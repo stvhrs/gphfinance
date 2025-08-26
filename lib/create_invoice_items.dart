@@ -58,7 +58,7 @@ class CreateInvoiceItems extends StatelessWidget {
           onSuggestionSelected: (suggestion) {
             invoice.addItem(
               InvoiceItem(
-                id: DateTime.now().toIso8601String(),
+                id: DateTime.now().millisecondsSinceEpoch.toString(),
                 book: suggestion,
               ),
             );

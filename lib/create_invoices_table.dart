@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gphfinance/button_pushfirebase_invoices.dart';
 import 'package:gphfinance/model.dart';
 import 'package:gphfinance/provider/provider_invoices_table.dart';
 import 'package:provider/provider.dart';
@@ -196,11 +197,12 @@ class CreateInvoicesTable extends StatelessWidget {
                             ],
                           );
                         }).toList(),
+                        
                   ),
                 );
               },
             ),
-          ),
+          ),PushInvoicesButton()
         ],
       ),
     );

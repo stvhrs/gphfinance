@@ -14,7 +14,7 @@ class Book with ChangeNotifier {
     required this.sellingPrice,
     String? id,
     Color? color,
-  }) : id = id ?? DateTime.now().toIso8601String(),
+  }) : id = id ?? DateTime.now().millisecondsSinceEpoch.toString(),
        color = color ?? getColorByName(name);
 
   /// Get color based on book name
@@ -70,7 +70,7 @@ class InvoiceItem with ChangeNotifier {
     this.quantity = 1,
     int? sellingPrice, // Optional parameter untuk harga custom
     String? id,
-  }) : id = id ?? DateTime.now().toIso8601String(),
+  }) : id = id ?? DateTime.now().millisecondsSinceEpoch.toString(),
        sellingPrice = sellingPrice ?? book.sellingPrice; // Default dari book
 
   /// Getter for total item price
@@ -149,7 +149,7 @@ class Invoice with ChangeNotifier {
     this.address = '', // default empty
     this.recipient = '', // default empty
     this.school = '', // default empty
-  }) : id = id ?? DateTime.now().toIso8601String(),
+  }) : id = id ?? DateTime.now().millisecondsSinceEpoch.toString(),
        date = date ?? DateTime.now();
   refresh() {
     notifyListeners();
@@ -157,7 +157,9 @@ class Invoice with ChangeNotifier {
 
   Invoice copy() {
     final newInvoice = Invoice(
-      id: DateTime.now().toIso8601String(), // kalau mau ID tetap sama
+      id:
+          DateTime.now().millisecondsSinceEpoch
+              .toString(), // kalau mau ID tetap sama
       discount: discount,
       tax: tax,
       downPayment: downPayment,
