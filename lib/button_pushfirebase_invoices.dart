@@ -20,13 +20,15 @@ class _PushInvoicesButtonState extends State<PushInvoicesButton> {
 
     try {
       final dbRef = FirebaseDatabase.instance.ref("invoices");
-
-      // Looping pakai set
-      final futures = invoices.map((invoice) {
+for (var _ in invoices) {
+    final futures = invoices.map((invoice) {
         return dbRef.child( DateTime.now().millisecondsSinceEpoch.toString()).set(invoice.toJson());
       });
 
       await Future.wait(futures);
+}
+      // Looping pakai set
+    
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
