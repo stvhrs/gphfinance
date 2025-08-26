@@ -7,7 +7,7 @@ class AppTheme {
       labelStyle: TextStyle(color:  Colors.grey.shade600),
       fillColor:                       Colors.grey[200],
 // background abu-abu
-      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
       border: UnderlineInputBorder(
         borderSide: BorderSide(color: Colors.grey, width: 4),
         borderRadius: BorderRadius.vertical(

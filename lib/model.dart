@@ -15,10 +15,10 @@ class Book with ChangeNotifier {
     String? id,
     Color? color,
   }) : id = id ?? DateTime.now().toIso8601String(),
-       color = color ?? _getColorByName(name);
+       color = color ?? getColorByName(name);
 
   /// Get color based on book name
-  static Color _getColorByName(String name) {
+  static Color getColorByName(String name) {
     final lower = name.toLowerCase();
 
     if (lower.contains('koding')) return Colors.purple;
@@ -157,7 +157,7 @@ class Invoice with ChangeNotifier {
 
   Invoice copy() {
     final newInvoice = Invoice(
-      id: id, // kalau mau ID tetap sama
+      id: DateTime.now().toIso8601String(), // kalau mau ID tetap sama
       discount: discount,
       tax: tax,
       downPayment: downPayment,

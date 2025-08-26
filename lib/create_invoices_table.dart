@@ -207,10 +207,10 @@ class CreateInvoicesTable extends StatelessWidget {
   }
 
   Widget _buildSummaryCard(String title, String value, Color color) {
-    return Card(
+    return Container(
       color: color.withOpacity(0.1),
       child: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

@@ -56,105 +56,118 @@ class CreateInvoiceItems extends StatelessWidget {
             );
           },
           onSuggestionSelected: (suggestion) {
-            invoice.addItem(InvoiceItem(book: suggestion));
+            invoice.addItem(
+              InvoiceItem(
+                id: DateTime.now().toIso8601String(),
+                book: suggestion,
+              ),
+            );
           },
           displayAllSuggestionWhenTap: true,
           isMultiSelectDropdown: false,
         ),
+        Column(
+          children:
+              invoice.items.map((item) {
+                return Padding(
+                  key: ValueKey(item.book.id),
+                  padding: const EdgeInsets.only(top: 10),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 6,
 
-        ...invoice.items.map((e) {
-          final item = e;
-
-          return Padding(
-            padding: const EdgeInsets.only(top: 10),
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 6,
-
-                  child: TextFormField(
-                    enabled: false,
-                    initialValue: item.book.name,
-                    decoration: InputDecoration(
-                      labelText: "Book Title",
-                      fillColor: item.book.color.withOpacity(0.07),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 10),
-                Expanded(
-                  flex: 3,
-                  child: TextFormField(
-                    initialValue: Rupiah.toStringFormated(
-                      item.sellingPrice.toDouble(),
-                    ),
-
-                    decoration: InputDecoration(
-                      labelText: "Selling Price",
-
-                      fillColor: item.book.color.withOpacity(0.07),
-                    ),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                      CurrencyInputFormatter(),
-                    ],
-                    onChanged: (value) {
-                      final val = int.tryParse(Rupiah.toDouble(value).toString()) ?? 0;
-                      log(val.toString());
-                      item.updateSellingPrice(val);
-                      invoice.refresh();
-                    },
-                  ),
-                ),
-                SizedBox(width: 10),
-
-                Expanded(
-                  flex: 1,
-                  child: TextFormField(
-                    initialValue: item.quantity.toString(),
-                    textAlign: TextAlign.center,
-
-                    decoration: InputDecoration(
-                      labelText: "Qty",
-                      fillColor: item.book.color.withOpacity(0.07),
-                    ),
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    onChanged: (value) {
-                      final val = int.tryParse(value) ?? 0;
-                      item.updateQuantity(val);
-                      invoice.refresh();
-                    },
-                  ),
-                ),
-                SizedBox(width: 10),
-
-                Expanded(
-                  flex: 3,
-                  child: TextFormField(
-                    enabled: false,
-
-                    decoration: InputDecoration(
-                      fillColor: item.book.color.withOpacity(0.07),
-                      labelText: Rupiah.toStringFormated(
-                        item.totalPrice.toDouble(),
+                        child: TextFormField(
+                          enabled: false,
+                          initialValue: item.book.name,
+                          decoration: InputDecoration(
+                            labelText: "Book Title",
+                            // ignore: deprecated_member_use
+                            fillColor: item.book.color.withOpacity(0.07),
+                          ),
+                        ),
                       ),
-                    ),
+                      SizedBox(width: 10),
+                      Expanded(
+                        flex: 3,
+                        child: TextFormField(
+                          initialValue: Rupiah.toStringFormated(
+                            item.sellingPrice.toDouble(),
+                          ),
 
-                    onChanged: (value) {},
+                          decoration: InputDecoration(
+                            labelText: "Selling Price",
+
+                            fillColor: item.book.color.withOpacity(0.07),
+                          ),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            CurrencyInputFormatter(),
+                          ],
+                          onChanged: (value) {
+                            final val =
+                                int.tryParse(
+                                  Rupiah.toDouble(value).toString(),
+                                ) ??
+                                0;
+                            log(val.toString());
+                            item.updateSellingPrice(val);
+                            invoice.refresh();
+                          },
+                        ),
+                      ),
+                      SizedBox(width: 10),
+
+                      Expanded(
+                        flex: 1,
+                        child: TextFormField(
+                          initialValue: item.quantity.toString(),
+                          textAlign: TextAlign.center,
+
+                          decoration: InputDecoration(
+                            labelText: "Qty",
+                            fillColor: item.book.color.withOpacity(0.07),
+                          ),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          onChanged: (value) {
+                            final val = int.tryParse(value) ?? 0;
+                            item.updateQuantity(val);
+                            invoice.refresh();
+                          },
+                        ),
+                      ),
+                      SizedBox(width: 10),
+
+                      Expanded(
+                        flex: 3,
+                        child: TextFormField(
+                          enabled: false,
+
+                          decoration: InputDecoration(
+                            fillColor: item.book.color.withOpacity(0.07),
+                            labelText: Rupiah.toStringFormated(
+                              item.totalPrice.toDouble(),
+                            ),
+                          ),
+
+                          onChanged: (value) {},
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.delete, color: Colors.red),
+                        onPressed: () {
+                          invoice.refresh();
+
+                          invoice.removeItem(item.id);
+                        },
+                      ),
+                    ],
                   ),
-                ),
-                IconButton(
-                  icon: Icon(Icons.delete, color: Colors.red),
-                  onPressed: () {
-                    invoice.refresh();
-
-                    invoice.removeItem(item.id);
-                  },
-                ),
-              ],
-            ),
-          );
-        }).toList(),
+                );
+              }).toList(),
+        ),
 
         // Invoice Items List
       ],
