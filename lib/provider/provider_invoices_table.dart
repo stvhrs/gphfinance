@@ -42,9 +42,14 @@ class InvoicesTableProvider with ChangeNotifier {
   }
 
   /// Add new invoice
-  void addInvoice(Invoice invoice) {
+  void addInvoice(Invoice invoice, {bool listen = true}) {
     _invoices.add(invoice);
-    notifyListeners();
+    listen ? notifyListeners() : "";
+  }
+
+  void setInvoices(List<Invoice> invoices, {bool listen = true}) {
+    _invoices = invoices;
+    listen ? notifyListeners() : "";
   }
 
   /// Remove invoice
@@ -78,13 +83,13 @@ class InvoicesTableProvider with ChangeNotifier {
   }
 
   /// Load invoices from JSON list
-  void loadInvoicesFromJson(List<Map<String, dynamic>> invoicesJson) {
+  void loadInvoicesFromJson(List<Map<dynamic, dynamic>> invoicesJson) {
     _invoices = invoicesJson.map((json) => Invoice.fromJson(json)).toList();
     notifyListeners();
   }
 
   /// Convert all invoices to JSON list
-  List<Map<String, dynamic>> toJsonList() {
+  List<Map<dynamic, dynamic>> toJsonList() {
     return _invoices.map((invoice) => invoice.toJson()).toList();
   }
 }

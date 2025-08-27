@@ -14,8 +14,8 @@ class Book with ChangeNotifier {
     required this.sellingPrice,
     String? id,
     Color? color,
-  }) : id = id ?? DateTime.now().millisecondsSinceEpoch.toString(),
-       color = color ?? getColorByName(name);
+  })  : id = id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        color = color ?? getColorByName(name);
 
   /// Get color based on book name
   static Color getColorByName(String name) {
@@ -32,7 +32,7 @@ class Book with ChangeNotifier {
   }
 
   /// Convert to JSON
-  Map<String, dynamic> toJson() {
+  Map<dynamic, dynamic> toJson() {
     return {
       'id': id,
       'name': name,
@@ -42,7 +42,7 @@ class Book with ChangeNotifier {
   }
 
   /// Create from JSON
-  static Book fromJson(Map<String, dynamic> json) {
+  static Book fromJson(Map<dynamic, dynamic> json) {
     return Book(
       id: json['id'],
       name: json['name'],
@@ -70,14 +70,14 @@ class InvoiceItem with ChangeNotifier {
     this.quantity = 1,
     int? sellingPrice, // Optional parameter untuk harga custom
     String? id,
-  }) : id = id ?? DateTime.now().millisecondsSinceEpoch.toString(),
-       sellingPrice = sellingPrice ?? book.sellingPrice; // Default dari book
+  })  : id = id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        sellingPrice = sellingPrice ?? book.sellingPrice; // Default dari book
 
   /// Getter for total item price
   int get totalPrice => sellingPrice * quantity;
 
   /// Convert to JSON
-  Map<String, dynamic> toJson() {
+  Map<dynamic, dynamic> toJson() {
     return {
       'id': id,
       'book': book.toJson(),
@@ -87,7 +87,7 @@ class InvoiceItem with ChangeNotifier {
   }
 
   /// Create from JSON
-  static InvoiceItem fromJson(Map<String, dynamic> json) {
+  static InvoiceItem fromJson(Map<dynamic, dynamic> json) {
     return InvoiceItem(
       id: json['id'],
       book: Book.fromJson(json['book']),
@@ -149,17 +149,17 @@ class Invoice with ChangeNotifier {
     this.address = '', // default empty
     this.recipient = '', // default empty
     this.school = '', // default empty
-  }) : id = id ?? DateTime.now().millisecondsSinceEpoch.toString(),
-       date = date ?? DateTime.now();
+  })  : id = id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        date = date ?? DateTime.now();
   refresh() {
     notifyListeners();
   }
 
   Invoice copy() {
     final newInvoice = Invoice(
-      id:
-          DateTime.now().millisecondsSinceEpoch
-              .toString(), // kalau mau ID tetap sama
+      id: DateTime.now()
+          .millisecondsSinceEpoch
+          .toString(), // kalau mau ID tetap sama
       discount: discount,
       tax: tax,
       downPayment: downPayment,
@@ -252,7 +252,7 @@ class Invoice with ChangeNotifier {
   // METHODS ================================================================
 
   /// Convert to JSON
-  Map<String, dynamic> toJson() {
+  Map<dynamic, dynamic> toJson() {
     return {
       'id': id,
       'items': items.map((item) => item.toJson()).toList(),
@@ -268,13 +268,12 @@ class Invoice with ChangeNotifier {
   }
 
   /// Create from JSON
-  static Invoice fromJson(Map<String, dynamic> json) {
+  static Invoice fromJson(Map<dynamic, dynamic> json) {
     return Invoice(
       id: json['id'],
-      items:
-          (json['items'] as List)
-              .map((item) => InvoiceItem.fromJson(item))
-              .toList(),
+      items: (json['items'] as List)
+          .map((item) => InvoiceItem.fromJson(item))
+          .toList(),
       discount: json['discount'],
       tax: json['tax'],
       downPayment: json['downPayment'],
