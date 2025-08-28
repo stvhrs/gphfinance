@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:gphfinance/create%20invoice/preview_pdf.dart';
 import 'package:gphfinance/model.dart';
 import 'package:gphfinance/provider/provider_invoices_table.dart';
+import 'package:gphfinance/provider/provider_stream_inovices.dart';
 import 'package:provider/provider.dart';
 
 class InvoicesTableStream extends StatefulWidget {
@@ -13,7 +15,7 @@ class _InvoicesTableStreamState extends State<InvoicesTableStream> {
   final DatabaseReference _dbRef =
       FirebaseDatabase.instance.ref().child("invoices");
       
-  final int _rowsPerPage = 3;
+  final int _rowsPerPage = 20;
   int _currentPage = 0;
   List<Invoice> _allInvoices = [];
 
@@ -107,7 +109,7 @@ class _InvoicesTableStreamState extends State<InvoicesTableStream> {
 
                 // Update provider
                 WidgetsBinding.instance.addPostFrameCallback((_) {
-                  context.read<InvoicesTableProvider>().setInvoices(_allInvoices);
+                  context.read<ProviderStreamInovices>().setInvoices(_allInvoices);
                 });
 
                 // Get current page data
@@ -243,6 +245,7 @@ class _InvoicesTableStreamState extends State<InvoicesTableStream> {
                                             _editInvoice(invoice);
                                           },
                                         ),
+                                        InvoicePreviewButton(invoice: invoice)
                                       ],
                                     ),
                                   ),

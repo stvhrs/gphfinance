@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:gphfinance/create_invoice_items.dart';
+import 'package:gphfinance/create%20invoice/create_invoice_items.dart';
 import 'package:gphfinance/helper/input_currency.dart';
 import 'package:gphfinance/helper/rupiah_format.dart';
 import 'package:provider/provider.dart';
-import 'package:gphfinance/create_invoices_table.dart';
+import 'package:gphfinance/create%20invoice/create_invoices_table.dart';
 import 'package:gphfinance/model.dart';
 import 'package:gphfinance/provider/provider_invoices_table.dart';
 import 'package:drop_down_search_field/drop_down_search_field.dart';
@@ -23,46 +23,47 @@ class CreateInvoiceCustomer extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: TextFormField(
+              child: TextFormField(controller: invoice.textEditingControllerRecipient,
                 decoration: InputDecoration(
                   labelText: 'Recipient Name',
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.person),
                 ),
-                initialValue: invoice.recipient,
                 onChanged: (value) => invoice.updateRecipient(value),
               ),
             ),
-SizedBox(width: 10,)
-,
+            SizedBox(
+              width: 10,
+            ),
             Expanded(
-              child: TextFormField(
+              child: TextFormField(controller: invoice.textEditingControllerSchool,
                 decoration: InputDecoration(
                   labelText: 'School',
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.school),
                 ),
-                initialValue: invoice.school,
                 onChanged: (value) => invoice.updateSchool(value),
               ),
             ),
-SizedBox(width: 10,)
-,
+            SizedBox(
+              width: 10,
+            ),
             Expanded(
-              child: TextFormField(
+              child: TextFormField(controller: invoice.textEditingControllerAdreess,
                 decoration: InputDecoration(
                   labelText: 'Address',
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.location_on),
                 ),
-                initialValue: invoice.address,
                 onChanged: (value) => invoice.updateAddress(value),
               ),
             ),
           ],
         ),
-SizedBox(height: 10,)
-,        Row(
+        SizedBox(
+          height: 10,
+        ),
+        Row(
           children: [
             Expanded(
               child: TextFormField(
@@ -80,8 +81,9 @@ SizedBox(height: 10,)
                 },
               ),
             ),
-SizedBox(width: 10,)
-,
+            SizedBox(
+              width: 10,
+            ),
             Expanded(
               child: TextFormField(
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -98,8 +100,9 @@ SizedBox(width: 10,)
                 },
               ),
             ),
-SizedBox(width: 10,)
-,
+            SizedBox(
+              width: 10,
+            ),
             Expanded(
               child: TextFormField(
                 inputFormatters: [

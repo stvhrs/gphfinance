@@ -5,8 +5,6 @@ import 'package:gphfinance/provider/provider_invoices_table.dart';
 import 'package:provider/provider.dart';
 
 class PushInvoicesButton extends StatefulWidget {
-
-
   @override
   State<PushInvoicesButton> createState() => _PushInvoicesButtonState();
 }
@@ -20,21 +18,23 @@ class _PushInvoicesButtonState extends State<PushInvoicesButton> {
 
     try {
       final dbRef = FirebaseDatabase.instance.ref("invoices");
-for (var _ in invoices) {
-    final futures = invoices.map((invoice) {
-        return dbRef.child( DateTime.now().millisecondsSinceEpoch.toString()).set(invoice.toJson());
-      });
+      for (var _ in invoices) {
+        final futures = invoices.map((invoice) {
+          return dbRef
+              .child(DateTime.now().millisecondsSinceEpoch.toString())
+              .set(invoice.toJson());
+        });
 
-      await Future.wait(futures);
-}
+        await Future.wait(futures);
+      }
       // Looping pakai set
-    
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Invoices berhasil dipush (${invoices.length})"),
         ),
       );
+      context.read<InvoicesTableProvider>().setInvoices([]);
     } catch (e) {
       ScaffoldMessenger.of(
         context,
@@ -52,17 +52,16 @@ for (var _ in invoices) {
         padding: EdgeInsets.symmetric(horizontal: 24, vertical: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
-      child:
-          _isLoading
-              ? SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                  strokeWidth: 2,
-                ),
-              )
-              : Text("Push Invoices"),
+      child: _isLoading
+          ? SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 2,
+              ),
+            )
+          : Text("Push Invoices"),
     );
   }
 }

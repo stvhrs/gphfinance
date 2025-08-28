@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:gphfinance/cerate_invoice_summary.dart';
-import 'package:gphfinance/create_invoice_customer.dart';
-import 'package:gphfinance/create_invoice_items.dart';
+import 'package:gphfinance/create%20invoice/cerate_invoice_summary.dart';
+import 'package:gphfinance/create%20invoice/create_invoice_customer.dart';
+import 'package:gphfinance/create%20invoice/create_invoice_items.dart';
 import 'package:gphfinance/helper/input_currency.dart';
 import 'package:gphfinance/helper/rupiah_format.dart';
 import 'package:provider/provider.dart';
-import 'package:gphfinance/create_invoices_table.dart';
+import 'package:gphfinance/create%20invoice/create_invoices_table.dart';
 import 'package:gphfinance/model.dart';
 import 'package:gphfinance/provider/provider_invoices_table.dart';
 import 'package:drop_down_search_field/drop_down_search_field.dart';
 
-
 class CreateInvoices extends StatelessWidget {
-  
   final List<Book> availableBooks = [
     Book(name: "Matematika Dasar", costPrice: 50000, sellingPrice: 75000),
     Book(name: "Bahasa Inggris", costPrice: 45000, sellingPrice: 68000),
@@ -24,10 +22,6 @@ class CreateInvoices extends StatelessWidget {
     final invoice = context.watch<Invoice>();
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Invoice Management'),
-        backgroundColor: Colors.blue,
-      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Row(
@@ -35,17 +29,16 @@ class CreateInvoices extends StatelessWidget {
             Expanded(
               flex: 3,
               child: ListView(
-               
                 children: [
                   // Customer Information Section
                   // Customer Information Section + Diskon + PPN + Bayar
                   CreateInvoiceCustomer(),
 
                   // Section: Add Books to Invoice
-                  
-   SizedBox(height: 10),
+
+                  SizedBox(height: 10),
                   // Section: Invoice Details
-                 CreateInvoiceItems(),
+                  CreateInvoiceItems(),
                   SizedBox(height: 10),
                   // Invoice Summary
                   CerateInvoiceSummary(),
@@ -54,21 +47,13 @@ class CreateInvoices extends StatelessWidget {
                   SizedBox(height: 10),
                   Row(
                     children: [
-                     
                       ElevatedButton(
                         onPressed: () {
                           final invoiceProvider =
                               context.read<InvoicesTableProvider>();
                           final invoiceCopy = invoice.copy();
                           invoiceProvider.addInvoice(invoiceCopy);
-
-                          // Show success message
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Invoice berhasil ditambahkan!'),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
+                          invoice.resetCustomerInfo();
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
@@ -80,16 +65,16 @@ class CreateInvoices extends StatelessWidget {
                 ],
               ),
             ),
-            VerticalDivider(width: 8,)
-            ,
-            VerticalDivider(width: 8,)
-,
+            VerticalDivider(
+              width: 8,
+            ),
+            VerticalDivider(
+              width: 8,
+            ),
             Expanded(flex: 3, child: CreateInvoicesTable()),
           ],
         ),
       ),
     );
   }
-
- 
 }

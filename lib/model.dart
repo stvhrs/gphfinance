@@ -127,7 +127,7 @@ class InvoiceItem with ChangeNotifier {
 
 /// INVOICE WITH PROVIDER
 class Invoice with ChangeNotifier {
-  final String id;
+  String id;
   List<InvoiceItem> items;
   double discount; // percentage (%)
   double tax; // percentage (%)
@@ -152,6 +152,24 @@ class Invoice with ChangeNotifier {
   })  : id = id ?? DateTime.now().millisecondsSinceEpoch.toString(),
         date = date ?? DateTime.now();
   refresh() {
+    notifyListeners();
+  }
+
+  TextEditingController textEditingControllerAdreess = TextEditingController();
+  TextEditingController textEditingControllerRecipient =
+      TextEditingController();
+
+  TextEditingController textEditingControllerSchool = TextEditingController();
+
+  resetCustomerInfo() {
+    textEditingControllerSchool.clear();
+    textEditingControllerRecipient.clear();
+    textEditingControllerAdreess.clear();
+
+    address = '';
+    recipient = "";
+    school = "";
+    id = DateTime.now().millisecondsSinceEpoch.toString();
     notifyListeners();
   }
 

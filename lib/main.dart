@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:gphfinance/create_invoices.dart';
+import 'package:gphfinance/create%20invoice/create_invoices.dart';
 import 'package:gphfinance/model.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:gphfinance/provider/provider_invoices_table.dart';
+import 'package:gphfinance/provider/provider_stream_books.dart';
+import 'package:gphfinance/provider/provider_stream_inovices.dart';
+import 'package:gphfinance/sidemenu.dart';
 import 'package:gphfinance/theme.dart';
 import 'package:provider/provider.dart';
-
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 void main() async{
     WidgetsFlutterBinding.ensureInitialized();
-
+    
   await Firebase.initializeApp(
     options: const FirebaseOptions(
       apiKey: "AIzaSyAiI8WtsByC8eNaH8_eyyu97nAOvADeMT0",
@@ -22,6 +26,8 @@ void main() async{
   measurementId: "G-Q06SCZ9XF1"
     ),
   );
+  await initializeDateFormatting('id_ID', null);
+
 
   runApp(MyApp());
 }
@@ -32,12 +38,14 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => InvoicesTableProvider()),
+        ChangeNotifierProvider(create: (context) => ProviderStreamBooks()),
+        ChangeNotifierProvider(create: (context) => ProviderStreamInovices()),
         ChangeNotifierProvider(create: (context) => Invoice()),
       ],
       child: MaterialApp(
         title: 'Invoice Management System',
         theme: AppTheme.theme,
-        home: CreateInvoices(),
+        home: Home(title: '',),
       ),
     );
   }
