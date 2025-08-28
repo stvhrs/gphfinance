@@ -23,6 +23,19 @@ class _BookTableStreamState extends State<BookTableStream> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.green,
+        child: Icon(Icons.add),
+        onPressed: () async {
+          final result = await showDialog(
+            context: context,
+            builder: (context) => AddEditBookDialog(),
+          );
+          if (result == true) {
+            // refresh list book kalau perlu
+          }
+        },
+      ),
       body: Column(
         children: [
           Expanded(
@@ -127,11 +140,10 @@ class _BookTableStreamState extends State<BookTableStream> {
                                     Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                       
                                         IconButton(
                                           icon: Icon(Icons.edit,
                                               size: 18, color: Colors.green),
-                                          onPressed: ()async {
+                                          onPressed: () async {
                                             final result = await showDialog(
                                               context: context,
                                               builder: (context) =>

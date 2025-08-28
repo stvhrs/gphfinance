@@ -17,12 +17,15 @@ class _PushInvoicesButtonState extends State<PushInvoicesButton> {
     setState(() => _isLoading = true);
 
     try {
+      
       final dbRef = FirebaseDatabase.instance.ref("invoices");
-      for (var _ in invoices) {
+      for (var invoice in invoices) {
+         final invoiceCopy = await invoice.generatedId();
+                         
         final futures = invoices.map((invoice) {
           return dbRef
-              .child(DateTime.now().millisecondsSinceEpoch.toString())
-              .set(invoice.toJson());
+              .child(invoiceCopy.id)
+              .set(invoiceCopy.toJson());
         });
 
         await Future.wait(futures);

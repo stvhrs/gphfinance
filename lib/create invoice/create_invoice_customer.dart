@@ -57,6 +57,15 @@ class CreateInvoiceCustomer extends StatelessWidget {
                 ),
                 onChanged: (value) => invoice.updateAddress(value),
               ),
+            ),  Expanded(
+              child: TextFormField(controller: invoice.textEditingControllerNoHp,
+                decoration: InputDecoration(
+                  labelText: 'Phone',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.phone),
+                ),
+                onChanged: (value) => invoice.updatePhoneNumber(value),
+              ),
             ),
           ],
         ),

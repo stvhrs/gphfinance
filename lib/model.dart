@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gphfinance/helper/id_generator.dart';
 
 /// BOOK MODEL WITH PROVIDER
 class Book with ChangeNotifier {
@@ -124,7 +125,6 @@ class InvoiceItem with ChangeNotifier {
     return sellingPrice - book.sellingPrice;
   }
 }
-
 /// INVOICE WITH PROVIDER
 class Invoice with ChangeNotifier {
   String id;
@@ -137,6 +137,7 @@ class Invoice with ChangeNotifier {
   String address; // alamat
   String recipient; // penerima
   String school; // sekolah
+  String noHp; // nomor handphone - VARIABLE BARU
 
   Invoice({
     this.items = const [],
@@ -149,35 +150,38 @@ class Invoice with ChangeNotifier {
     this.address = '', // default empty
     this.recipient = '', // default empty
     this.school = '', // default empty
+    this.noHp = '', // default empty - VARIABLE BARU
   })  : id = id ?? DateTime.now().millisecondsSinceEpoch.toString(),
         date = date ?? DateTime.now();
+
   refresh() {
     notifyListeners();
   }
 
   TextEditingController textEditingControllerAdreess = TextEditingController();
-  TextEditingController textEditingControllerRecipient =
-      TextEditingController();
-
+  TextEditingController textEditingControllerRecipient = TextEditingController();
   TextEditingController textEditingControllerSchool = TextEditingController();
+  TextEditingController textEditingControllerNoHp = TextEditingController(); // CONTROLLER BARU
 
   resetCustomerInfo() {
     textEditingControllerSchool.clear();
     textEditingControllerRecipient.clear();
     textEditingControllerAdreess.clear();
-
+    textEditingControllerNoHp.clear(); // CLEAR BARU
     address = '';
     recipient = "";
     school = "";
+    noHp = ""; // RESET BARU
     id = DateTime.now().millisecondsSinceEpoch.toString();
     notifyListeners();
   }
 
-  Invoice copy() {
+  Future<Invoice> generatedId() async {
     final newInvoice = Invoice(
-      id: DateTime.now()
-          .millisecondsSinceEpoch
-          .toString(), // kalau mau ID tetap sama
+      id: await SimpleIdGenerator.generateSimpleId(
+        prefix: "GPH",
+        type: "INV",
+      ),
       discount: discount,
       tax: tax,
       downPayment: downPayment,
@@ -186,7 +190,8 @@ class Invoice with ChangeNotifier {
       address: address,
       recipient: recipient,
       school: school,
-      items: [], // akan diisi manual di bawah
+      noHp: noHp, // TAMBAHAN BARU
+      items: [],
     );
 
     // copy items satu-satu
@@ -202,6 +207,36 @@ class Invoice with ChangeNotifier {
 
     return newInvoice;
   }
+
+  Invoice copy() {
+    final newInvoice = Invoice(
+      id: DateTime.now().toIso8601String(),
+      discount: discount,
+      tax: tax,
+      downPayment: downPayment,
+      paid: paid,
+      date: date,
+      address: address,
+      recipient: recipient,
+      school: school,
+      noHp: noHp, // TAMBAHAN BARU
+      items: [],
+    );
+
+    // copy items satu-satu
+    for (var item in items) {
+      newInvoice.items.add(
+        InvoiceItem(
+          book: item.book,
+          quantity: item.quantity,
+          sellingPrice: item.sellingPrice,
+        ),
+      );
+    }
+
+    return newInvoice;
+  }
+
   // GETTERS ================================================================
 
   /// Subtotal before discount and tax
@@ -264,7 +299,21 @@ class Invoice with ChangeNotifier {
 
   /// Check if all required customer info is filled
   bool get hasCustomerInfo {
-    return address.isNotEmpty && recipient.isNotEmpty && school.isNotEmpty;
+    return address.isNotEmpty && recipient.isNotEmpty && school.isNotEmpty && noHp.isNotEmpty;
+  }
+
+  /// Check if phone number is valid (minimal 10 digit)
+  bool get hasValidPhoneNumber {
+    return noHp.length >= 10 && RegExp(r'^[0-9+]+$').hasMatch(noHp);
+  }
+
+  /// Format phone number for display
+  String get formattedPhoneNumber {
+    if (noHp.isEmpty) return '-';
+    if (noHp.startsWith('0')) {
+      return '+62 ${noHp.substring(1)}';
+    }
+    return noHp;
   }
 
   // METHODS ================================================================
@@ -282,6 +331,7 @@ class Invoice with ChangeNotifier {
       'address': address,
       'recipient': recipient,
       'school': school,
+      'noHp': noHp, // TAMBAHAN BARU
     };
   }
 
@@ -300,6 +350,7 @@ class Invoice with ChangeNotifier {
       address: json['address'] ?? '',
       recipient: json['recipient'] ?? '',
       school: json['school'] ?? '',
+      noHp: json['noHp'] ?? '', // TAMBAHAN BARU
     );
   }
 
@@ -380,15 +431,23 @@ class Invoice with ChangeNotifier {
     notifyListeners();
   }
 
+  /// Update phone number - METHOD BARU
+  void updatePhoneNumber(String newNoHp) {
+    noHp = newNoHp;
+    notifyListeners();
+  }
+
   /// Update all customer info at once
   void updateCustomerInfo({
     String? address,
     String? recipient,
     String? school,
+    String? noHp, // PARAMETER BARU
   }) {
     if (address != null) this.address = address;
     if (recipient != null) this.recipient = recipient;
     if (school != null) this.school = school;
+    if (noHp != null) this.noHp = noHp; // TAMBAHAN BARU
     notifyListeners();
   }
 
@@ -397,7 +456,22 @@ class Invoice with ChangeNotifier {
     address = '';
     recipient = '';
     school = '';
+    noHp = ''; // TAMBAHAN BARU
     notifyListeners();
+  }
+
+  /// Validate phone number - METHOD BARU
+  String? validatePhoneNumber() {
+    if (noHp.isEmpty) {
+      return 'Nomor HP harus diisi';
+    }
+    if (noHp.length < 10) {
+      return 'Nomor HP minimal 10 digit';
+    }
+    if (!RegExp(r'^[0-9+]+$').hasMatch(noHp)) {
+      return 'Nomor HP hanya boleh mengandung angka dan tanda +';
+    }
+    return null;
   }
 
   /// Helper method to get month name

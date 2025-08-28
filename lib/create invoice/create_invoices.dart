@@ -5,6 +5,7 @@ import 'package:gphfinance/create%20invoice/create_invoice_customer.dart';
 import 'package:gphfinance/create%20invoice/create_invoice_items.dart';
 import 'package:gphfinance/helper/input_currency.dart';
 import 'package:gphfinance/helper/rupiah_format.dart';
+import 'package:gphfinance/provider/provider_stream_inovices.dart';
 import 'package:provider/provider.dart';
 import 'package:gphfinance/create%20invoice/create_invoices_table.dart';
 import 'package:gphfinance/model.dart';
@@ -12,11 +13,7 @@ import 'package:gphfinance/provider/provider_invoices_table.dart';
 import 'package:drop_down_search_field/drop_down_search_field.dart';
 
 class CreateInvoices extends StatelessWidget {
-  final List<Book> availableBooks = [
-    Book(name: "Matematika Dasar", costPrice: 50000, sellingPrice: 75000),
-    Book(name: "Bahasa Inggris", costPrice: 45000, sellingPrice: 68000),
-    Book(name: "Pemrograman Koding", costPrice: 60000, sellingPrice: 90000),
-  ];
+  
   @override
   Widget build(BuildContext context) {
     final invoice = context.watch<Invoice>();
@@ -48,10 +45,12 @@ class CreateInvoices extends StatelessWidget {
                   Row(
                     children: [
                       ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async{
+                           final stream =
+                              context.read<ProviderStreamInovices>().invoices.length;
                           final invoiceProvider =
                               context.read<InvoicesTableProvider>();
-                          final invoiceCopy = invoice.copy();
+                          final invoiceCopy =  invoice.copy();
                           invoiceProvider.addInvoice(invoiceCopy);
                           invoice.resetCustomerInfo();
                         },

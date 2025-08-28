@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gphfinance/create%20invoice/create_invoices.dart';
+import 'package:gphfinance/create%20invoice/pdf/pdf_view.dart';
 import 'package:gphfinance/model.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -11,23 +12,25 @@ import 'package:gphfinance/theme.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
-void main() async{
-    WidgetsFlutterBinding.ensureInitialized();
+
+void main() async {
     
+
+  WidgetsFlutterBinding.ensureInitialized();
+
   await Firebase.initializeApp(
     options: const FirebaseOptions(
-      apiKey: "AIzaSyAiI8WtsByC8eNaH8_eyyu97nAOvADeMT0",
-  authDomain: "gphfinance-674cb.firebaseapp.com",
-  databaseURL: "https://gphfinance-674cb-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "gphfinance-674cb",
-  storageBucket: "gphfinance-674cb.firebasestorage.app",
-  messagingSenderId: "247872950244",
-  appId: "1:247872950244:web:0130a09f33f3a3952dc1f1",
-  measurementId: "G-Q06SCZ9XF1"
-    ),
+        apiKey: "AIzaSyAiI8WtsByC8eNaH8_eyyu97nAOvADeMT0",
+        authDomain: "gphfinance-674cb.firebaseapp.com",
+        databaseURL:
+            "https://gphfinance-674cb-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "gphfinance-674cb",
+        storageBucket: "gphfinance-674cb.firebasestorage.app",
+        messagingSenderId: "247872950244",
+        appId: "1:247872950244:web:0130a09f33f3a3952dc1f1",
+        measurementId: "G-Q06SCZ9XF1"),
   );
   await initializeDateFormatting('id_ID', null);
-
 
   runApp(MyApp());
 }
@@ -45,7 +48,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Invoice Management System',
         theme: AppTheme.theme,
-        home: Home(title: '',),
+        home: Home(title: "",),
       ),
     );
   }
