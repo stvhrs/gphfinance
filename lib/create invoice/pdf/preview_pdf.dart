@@ -1,9 +1,9 @@
-// lib/pages/invoice_preview_button.dart
 import 'package:flutter/material.dart';
 import 'package:gphfinance/create%20invoice/pdf/create_invoice_pdf.dart';
 import 'package:gphfinance/create%20invoice/pdf/create_nota.dart';
 import 'package:gphfinance/create%20invoice/pdf/create_po.dart';
 import 'package:gphfinance/create%20invoice/pdf/create_surat_jalan.dart';
+import 'package:gphfinance/create%20invoice/pdf/pdf_view.dart';
 import 'package:printing/printing.dart';
 import 'package:gphfinance/model.dart';
 
@@ -15,49 +15,72 @@ class InvoicePreviewButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        ElevatedButton.icon(
-          label: const Text('INV'),
-          onPressed: () async {
-            await Printing.layoutPdf(
-                onLayout: (format) async =>
-                   await InvoicePdfService.generate(invoice, companyName: 'GPH'));
-           
+        PopupMenuButton<String>(
+          onSelected: (String result) async {
+            // Handle the menu item selection
+            print("Selected: $result");
+
+            // Switch case to handle different PDF generation based on selection
+             Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => PdfView(documentType: result,invoice: invoice,),
+                ));
           },
-        ),
-        ElevatedButton.icon(
-          label: const Text('SJ'),
-          onPressed: () async {
-            await Printing.layoutPdf(
-                onLayout: (format) async =>
-                   await DeliveryNotePdfGenerator.generateDeliveryNotePdf(invoice,));
-            // Printing.sharePdf(
-            //     filename: invoice.id,
-            //     bytes: await InvoicePdfService.generate(invoice,
-            //         companyName: 'GPH'));
-          },
-        ),   ElevatedButton.icon(
-          label: const Text('PO'),
-          onPressed: () async {
-            await Printing.layoutPdf(
-                onLayout: (format) async =>
-                   await PurchaseOrderPdfGenerator.generatePurchaseOrderPdf(invoice));
-            // Printing.sharePdf(
-            //     filename: invoice.id,
-            //     bytes: await PurchaseOrderPdfGenerator.generatePurchaseOrderPdf(invoice,
-            //         companyName: 'GPH'));
-          },
-        ),
-         ElevatedButton.icon(
-          label: const Text('NT'),
-          onPressed: () async {
-            await Printing.layoutPdf(
-                onLayout: (format) async =>
-                  await PaymentReceiptPdfGenerator.generatePaymentReceiptPdf(invoice));
-            // Printing.sharePdf(
-            //     filename: invoice.id,
-            //     bytes: await  PaymentReceiptPdfGenerator.generatePaymentReceiptPdf(invoice,
-            //         companyName: 'GPH'));
-          },
+          itemBuilder: (BuildContext context) => [
+            // "Create Invoice" menu item
+            PopupMenuItem<String>(
+              value: "Create All Document",
+              child: Row(
+                children: [
+                  Icon(Icons.folder, color: Colors.black),
+                  SizedBox(width: 10),
+                  Text("Create All Document"),
+                ],
+              ),
+            ),
+            PopupMenuItem<String>(
+              value: "Create Invoice",
+              child: Row(
+                children: [
+                  Icon(Icons.folder, color: Colors.black),
+                  SizedBox(width: 10),
+                  Text("Create Invoice"),
+                ],
+              ),
+            ),
+            // "Create PO" menu item
+            PopupMenuItem<String>(
+              value: "Create PO",
+              child: Row(
+                children: [
+                  Icon(Icons.add, color: Colors.black),
+                  SizedBox(width: 10),
+                  Text("Create PO"),
+                ],
+              ),
+            ),
+            // "Create Payment Receipt" menu item
+            PopupMenuItem<String>(
+              value: "Create Payment Receipt",
+              child: Row(
+                children: [
+                  Icon(Icons.payment, color: Colors.black),
+                  SizedBox(width: 10),
+                  Text("Create Payment Receipt"),
+                ],
+              ),
+            ),
+            // "Create Delivery Note" menu item
+            PopupMenuItem<String>(
+              value: "Create Delivery Note",
+              child: Row(
+                children: [
+                  Icon(Icons.delivery_dining, color: Colors.black),
+                  SizedBox(width: 10),
+                  Text("Create Delivery Note"),
+                ],
+              ),
+            ),
+          ],
         ),
       ],
     );

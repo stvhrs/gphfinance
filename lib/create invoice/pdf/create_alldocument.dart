@@ -16,24 +16,24 @@ class CombinedPdfGenerator {
     pw.Page invoicePdf =
         await InvoicePdfService.generate(invoice, returnPage: true);
 
-    // // Generate PDF for Purchase Order
-    // pw.Page purchaseOrderPdf =
-    //     await PurchaseOrderPdfGenerator.generatePurchaseOrderPdf(invoice, returnPage: true);
+    // Generate PDF for Purchase Order
+    pw.Page purchaseOrderPdf =
+        await PurchaseOrderPdfGenerator.generatePurchaseOrderPdf(invoice, returnPage: true);
 
-    // // Generate PDF for Payment Receipt
-    // pw.Page paymentReceiptPdf =
-    //     await PaymentReceiptPdfGenerator.generatePaymentReceiptPdf(invoice, returnPage: true);
+    // Generate PDF for Payment Receipt
+    pw.Page paymentReceiptPdf =
+        await PaymentReceiptPdfGenerator.generatePaymentReceiptPdf(invoice, returnPage: true);
 
 
-    // // Generate PDF for Delivery Note
-    // pw.Page deliveryNotePdf =
-    //     await DeliveryNotePdfGenerator.generateDeliveryNotePdf(invoice, returnPage: true);
+    // Generate PDF for Delivery Note
+    pw.Page deliveryNotePdf =
+        await DeliveryNotePdfGenerator.generateDeliveryNotePdf(invoice, returnPage: true);
 
     // Add Invoice to the combined PDF
     pdf.addPage(invoicePdf);
-    // pdf.addPage(purchaseOrderPdf);
-    // pdf.addPage(paymentReceiptPdf);
-    // pdf.addPage(deliveryNotePdf);
+    pdf.addPage(purchaseOrderPdf);
+    pdf.addPage(paymentReceiptPdf);
+    pdf.addPage(deliveryNotePdf);
 
 
     return pdf.save(); // Return the combined PDF as Uint8List

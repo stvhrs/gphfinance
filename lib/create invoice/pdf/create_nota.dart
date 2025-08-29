@@ -58,7 +58,7 @@ class PaymentReceiptPdfGenerator {
       return multiPage;
     }
    else {
-      return pdf.save();
+      return await pdf.save();
     }
   }
 

@@ -10,7 +10,7 @@ import 'package:intl/intl.dart';
 import 'dart:io';
 
 class DeliveryNotePdfGenerator {
-  static Future<dynamic> generateDeliveryNotePdf(Invoice invoice,
+  static Future generateDeliveryNotePdf(Invoice invoice,
       {String companyName = 'STUDIO SHODWE',
       bool returnPage = false,
       String companyAddress = 'Jl. Contoh No. 1, Jakarta',
@@ -42,7 +42,7 @@ class DeliveryNotePdfGenerator {
       return multiPage;
     }
    else {
-      return pdf.save();
+      return await pdf.save();
     }
   }
 

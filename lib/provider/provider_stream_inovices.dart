@@ -3,8 +3,16 @@ import 'package:gphfinance/model.dart';
 
 class ProviderStreamInovices with ChangeNotifier {
   List<Invoice> _invoices = [];
+  Invoice? _selectedInvoce;
 
   List<Invoice> get invoices => _invoices;
+  Invoice? get selectedInvoce => _selectedInvoce;
+  void selectinvoce(
+    Invoice invoce,
+  ) {
+    _selectedInvoce = invoce;
+    notifyListeners() ;
+  }
 
   /// Total harga dari semua invoice (total penjualan)
   double get totalSales {

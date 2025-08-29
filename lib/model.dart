@@ -125,6 +125,7 @@ class InvoiceItem with ChangeNotifier {
     return sellingPrice - book.sellingPrice;
   }
 }
+
 /// INVOICE WITH PROVIDER
 class Invoice with ChangeNotifier {
   String id;
@@ -159,9 +160,11 @@ class Invoice with ChangeNotifier {
   }
 
   TextEditingController textEditingControllerAdreess = TextEditingController();
-  TextEditingController textEditingControllerRecipient = TextEditingController();
+  TextEditingController textEditingControllerRecipient =
+      TextEditingController();
   TextEditingController textEditingControllerSchool = TextEditingController();
-  TextEditingController textEditingControllerNoHp = TextEditingController(); // CONTROLLER BARU
+  TextEditingController textEditingControllerNoHp =
+      TextEditingController(); // CONTROLLER BARU
 
   resetCustomerInfo() {
     textEditingControllerSchool.clear();
@@ -210,7 +213,7 @@ class Invoice with ChangeNotifier {
 
   Invoice copy() {
     final newInvoice = Invoice(
-      id: DateTime.now().toIso8601String(),
+      id: id,
       discount: discount,
       tax: tax,
       downPayment: downPayment,
@@ -299,7 +302,10 @@ class Invoice with ChangeNotifier {
 
   /// Check if all required customer info is filled
   bool get hasCustomerInfo {
-    return address.isNotEmpty && recipient.isNotEmpty && school.isNotEmpty && noHp.isNotEmpty;
+    return address.isNotEmpty &&
+        recipient.isNotEmpty &&
+        school.isNotEmpty &&
+        noHp.isNotEmpty;
   }
 
   /// Check if phone number is valid (minimal 10 digit)
@@ -492,4 +498,25 @@ class Invoice with ChangeNotifier {
     ];
     return months[month - 1];
   }
+  void updateFromInvoice(Invoice otherInvoice) {
+  id = otherInvoice.id;
+  items = List<InvoiceItem>.from(otherInvoice.items);
+  discount = otherInvoice.discount;
+  tax = otherInvoice.tax;
+  downPayment = otherInvoice.downPayment;
+  paid = otherInvoice.paid;
+  date = otherInvoice.date;
+  address = otherInvoice.address;
+  recipient = otherInvoice.recipient;
+  school = otherInvoice.school;
+  noHp = otherInvoice.noHp;
+  
+  // Update juga text editing controllers jika diperlukan
+  textEditingControllerAdreess.text = otherInvoice.address;
+  textEditingControllerRecipient.text = otherInvoice.recipient;
+  textEditingControllerSchool.text = otherInvoice.school;
+  textEditingControllerNoHp.text = otherInvoice.noHp;
+  
+  notifyListeners();
+}
 }

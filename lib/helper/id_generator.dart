@@ -6,7 +6,8 @@ class FirebaseHelper {
   // Mengambil counter untuk hari ini
   static Future<int> getCounter(String prefix, String type) async {
     final now = DateTime.now();
-    final today = '${_twoDigits(now.month)}${_twoDigits(now.day)}'; // Only month and day
+    final today = '${_twoDigits(now.year % 100)}${_twoDigits(now.month)}${_twoDigits(now.day)}'; // Correct format YYMMDD
+ // DDMMYY (last two digits of year)
     final key = '$prefix-$type-$today';  // Key berdasarkan tanggal
 
     // Ambil data counter dari Firebase
@@ -25,7 +26,8 @@ class FirebaseHelper {
   // Menyimpan counter yang sudah diincrement menggunakan transaksi
   static Future<void> incrementCounter(String prefix, String type) async {
     final now = DateTime.now();
-    final today = '${_twoDigits(now.month)}${_twoDigits(now.day)}'; // Only month and day
+    final today = '${_twoDigits(now.year % 100)}${_twoDigits(now.month)}${_twoDigits(now.day)}'; // Correct format YYMMDD
+ // DDMMYY (last two digits of year)
     final key = '$prefix-$type-$today';  // Key berdasarkan tanggal
 
     // Increment counter di Firebase menggunakan transaksi
@@ -47,16 +49,17 @@ class SimpleIdGenerator {
     int sequenceLength = 4,
   }) async {
     final now = DateTime.now();
-    final today = '${_twoDigits(now.day)}${_twoDigits(now.month)}'; // Day and month in format DDMM
-    final key = '$prefix-$type-$today'; // Key yang menggunakan hari dan bulan
+    final today = '${_twoDigits(now.year % 100)}${_twoDigits(now.month)}${_twoDigits(now.day)}'; // Correct format YYMMDD
+ // Correct format DDMMYY (last two digits of year)
+    final key = '$prefix-$type-$today'; // Key using day, month, and last 2 digits of year
 
-    // Ambil counter dari Firebase
+    // Get the counter from Firebase
     int counter = await FirebaseHelper.getCounter(prefix, type);
 
-    // Increment counter di Firebase
+    // Increment the counter in Firebase
     await FirebaseHelper.incrementCounter(prefix, type);
 
-    // Format sequence menjadi 4 digit
+    // Format the sequence to a 4-digit length
     final sequence = counter.toString().padLeft(sequenceLength, '0');
 
     return '$prefix-$type-$today-$sequence'; // Example: 'INV-BOOK-250828-0001'

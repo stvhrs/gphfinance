@@ -167,16 +167,7 @@ class CreateInvoicesTable extends StatelessWidget {
                                         _viewInvoiceDetails(context, invoice);
                                       },
                                     ),
-                                    IconButton(
-                                      icon: Icon(
-                                        Icons.edit,
-                                        size: 18,
-                                        color: Colors.blue,
-                                      ),
-                                      onPressed: () {
-                                        _editInvoice(context, invoice);
-                                      },
-                                    ),
+                                   
                                     IconButton(
                                       icon: Icon(
                                         Icons.delete,
@@ -283,9 +274,7 @@ class CreateInvoicesTable extends StatelessWidget {
     );
   }
 
-  void _editInvoice(BuildContext context, Invoice invoice) {
-    // Navigate to edit invoice screen
-  }
+  
 
   void _deleteInvoice(
     BuildContext context,

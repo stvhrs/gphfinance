@@ -54,7 +54,7 @@ class PurchaseOrderPdfGenerator {
       return multiPage;
     }
      else {
-      return pdf.save();
+      return await pdf.save();
     }
   }
 
