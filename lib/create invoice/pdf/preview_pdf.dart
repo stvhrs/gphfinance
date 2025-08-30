@@ -15,7 +15,7 @@ class InvoicePreviewButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        PopupMenuButton<String>(
+        PopupMenuButton<String>(icon:Icon( Icons.print,),
           onSelected: (String result) async {
             // Handle the menu item selection
             print("Selected: $result");

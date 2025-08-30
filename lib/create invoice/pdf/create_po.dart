@@ -294,7 +294,7 @@ static pw.Widget _buildSignatureSection(pw.MemoryImage ttd) {
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               pw.Text(
-                'PO no : ${invoice.id.replaceAll("INV", "PO")}',
+                'No : ${invoice.id.replaceAll("INV", "PO")}',
                 style: _textStyles.mediumBold,
               ),
               pw.SizedBox(height: 4),
@@ -403,7 +403,7 @@ static pw.Widget _buildSignatureSection(pw.MemoryImage ttd) {
         pw.Image(mandiri, width: 120, height: 30),
         _buildBankInfoRow('No Rekening  :  ', _bankAccount),
         pw.Text(
-          "CV $_companyName",
+          "$_companyName",
           style: _textStyles.small,
         ),
       ],
@@ -420,18 +420,18 @@ static pw.Widget _buildSignatureSection(pw.MemoryImage ttd) {
           children: [
             pw.Text('Catatan:', style: _textStyles.smallBold),
             pw.SizedBox(height: 4),
-            pw.Text(
-              '• Pembayaran harus diterima dalam waktu 30 hari setelah tanggal invoice.',
-              style: _textStyles.small,
-            ),
-            pw.Text(
-              '• Harap simpan invoice ini sebagai bukti pembayaran.',
-              style: _textStyles.small,
-            ),
-            pw.Text(
-              '• Pembayaran dianggap sah setelah dana diterima.',
-              style: _textStyles.small,
-            ),
+             pw.Text(
+                '• Pembayaran: 50% saat pemesanan, 50% saat pengiriman.',
+                style: _textStyles.small,
+              ),
+              pw.Text(
+                '• PO ini berlaku selama 30 hari kalender.',
+                style: _textStyles.small,
+              ),
+              pw.Text(
+                '• PGaransi: Buku dapat ditukar dalam kondisi cacat produksi.',
+                style: _textStyles.small,
+              ),
             pw.SizedBox(height: 12),
           ],
         ),

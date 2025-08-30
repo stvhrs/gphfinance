@@ -40,7 +40,7 @@ class _BookTableStreamState extends State<BookTableStream> {
         children: [
           Expanded(
             child: StreamBuilder(
-              stream: _dbRef.onValue,
+              stream: _dbRef.orderByKey().onValue,
               builder: (context, AsyncSnapshot<DatabaseEvent> snapshot) {
                 if (snapshot.hasError) {
                   return Center(child: Text("Error: ${snapshot.error}"));
@@ -66,7 +66,7 @@ class _BookTableStreamState extends State<BookTableStream> {
                 }).toList();
 
                 // Sort by date descending (newest first)
-                _allbooks.sort((a, b) => b.id.compareTo(a.id));
+                _allbooks.sort((a, b) => a.name.compareTo(b.name));
 
                 // Update provider
                 WidgetsBinding.instance.addPostFrameCallback((_) {

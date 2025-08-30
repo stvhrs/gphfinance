@@ -106,7 +106,7 @@ class _InvoicesTableStreamState extends State<InvoicesTableStream> {
           Divider(),
           Expanded(
             child: StreamBuilder(
-              stream: _dbRef.onValue,
+              stream: _dbRef.orderByKey() .onValue,
               builder: (context, AsyncSnapshot<DatabaseEvent> snapshot) {
                 if (snapshot.hasError) {
                   return Center(child: Text("Error: ${snapshot.error}"));
@@ -132,7 +132,7 @@ class _InvoicesTableStreamState extends State<InvoicesTableStream> {
                 }).toList();
 
                 // Sort by date descending (newest first)
-                _allInvoices.sort((a, b) => b.date.compareTo(a.date));
+                _allInvoices.sort((a, b) => b.id.compareTo(a.id));
 
                 // Update provider
                 WidgetsBinding.instance.addPostFrameCallback((_) {

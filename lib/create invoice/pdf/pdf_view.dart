@@ -5,6 +5,7 @@ import 'package:gphfinance/create%20invoice/pdf/create_invoice_pdf.dart';
 import 'package:gphfinance/create%20invoice/pdf/create_nota.dart';
 import 'package:gphfinance/create%20invoice/pdf/create_po.dart';
 import 'package:gphfinance/create%20invoice/pdf/create_surat_jalan.dart';
+import 'package:gphfinance/create%20invoice/pdf/test.dart';
 import 'package:gphfinance/model.dart';
 import 'package:printing/printing.dart';
 
@@ -52,7 +53,7 @@ class _PdfViewState extends State<PdfView> {
         return data;
 
       default:
-        data = await CombinedPdfGenerator.generateCombinedPdf(widget.invoice);
+        data = await AllPDF.generateDocument(invoice: widget.invoice,type: DocumentType.allDocuments);
         _sharePdf(data, widget.invoice.id);
         return data;
     }

@@ -185,7 +185,7 @@ static pw.Widget _formTTD() {
           pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              pw.Text('Surat Jalan no : ${invoice.id.replaceAll("INV", "SJ")}', style: _textStyles.mediumBold),
+              pw.Text('No : ${invoice.id.replaceAll("INV", "SJ")}', style: _textStyles.mediumBold),
               pw.SizedBox(height: 4),
               pw.Text(dateFmt.format(invoice.date), style: _textStyles.normal),
             ],

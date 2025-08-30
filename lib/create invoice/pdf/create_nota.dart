@@ -195,7 +195,7 @@ static pw.Widget _buildSignatureSection(pw.MemoryImage ttd) {
       ),
       margin: const pw.EdgeInsets.symmetric(horizontal: 48, vertical: 48),
       build: (context) => [
-        _buildHeader(logo),
+        _buildHeaderNota(logo),
         pw.SizedBox(height: 24),
         _buildBillTo(invoice, dateFmt),
         pw.SizedBox(height: 18),
@@ -217,7 +217,7 @@ static pw.Widget _buildSignatureSection(pw.MemoryImage ttd) {
   }
 
   // Header Section
-  static pw.Widget _buildHeader(pw.MemoryImage logo) {
+  static pw.Widget _buildHeaderNota(pw.MemoryImage logo) {
     return pw.Column(
       children: [
         pw.Row(
@@ -310,7 +310,7 @@ static pw.Widget _buildSignatureSection(pw.MemoryImage ttd) {
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               pw.Text(
-                'Nota no : ${invoice.id.replaceAll("INV", "NT")}',
+                'No : ${invoice.id.replaceAll("INV", "NT")}',
                 style: _textStyles.mediumBold,
               ),
               pw.SizedBox(height: 4),

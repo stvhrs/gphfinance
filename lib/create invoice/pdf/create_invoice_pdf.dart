@@ -186,7 +186,7 @@ class InvoicePdfService {
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               pw.Text(
-                'Invoice no : ${invoice.id}',
+                'No : ${invoice.id}',
                 style: _textStyles.mediumBold,
               ),
               pw.SizedBox(height: 4),
@@ -295,7 +295,7 @@ class InvoicePdfService {
         pw.Image(mandiri, width: 120, height: 30),
         _buildBankInfoRow('No Rekening  :  ', _bankAccount),
         pw.Text(
-          "CV $_companyName",
+          "$_companyName",
           style: _textStyles.small,
         ),
       ],
