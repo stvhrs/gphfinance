@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:gphfinance/create%20invoice/create_invoices.dart';
 import 'package:gphfinance/create%20invoice/pdf/preview_pdf.dart';
+import 'package:gphfinance/helper/rupiah_format.dart';
+import 'package:gphfinance/invoice_detail.dart';
 import 'package:gphfinance/model.dart';
 import 'package:gphfinance/provider/provider_invoices_table.dart';
 import 'package:gphfinance/provider/provider_stream_inovices.dart';
@@ -26,51 +28,74 @@ class _InvoicesTableStreamState extends State<InvoicesTableStream> {
       body: Column(
         children: [
           Consumer<ProviderStreamInovices>(
-            builder: (context, invoicesTableProvider, child) {
+            builder: (context, ProviderStreamInovices, child) {
               return Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Wrap(
                   spacing: 12,
                   runSpacing: 12,
                   children: [
+                    // Total Sales
                     _buildSummaryCard(
                       'Total Sales',
-                      'Rp${invoicesTableProvider.totalSales.toStringAsFixed(0)}',
+                      Rupiah.toStringFormated(ProviderStreamInovices
+                          .totalSales), // Memformat total sales menjadi Rupiah
                       Colors.green,
                     ),
+                    // Total HPP
                     _buildSummaryCard(
-                      'Total Cost',
-                      'Rp${invoicesTableProvider.totalCost.toStringAsFixed(0)}',
+                      'Total HPP',
+                      Rupiah.toStringFormated(ProviderStreamInovices
+                          .totalCost), // Memformat total cost menjadi Rupiah
                       Colors.blue,
                     ),
+                    // Total komisi
+                    _buildSummaryCard(
+                      'Total komisi',
+                      Rupiah.toStringFormated(ProviderStreamInovices
+                          .totalkomisi), // Memformat total komisi menjadi Rupiah
+                      Colors.blue,
+                    ),
+                    // Total Profit
                     _buildSummaryCard(
                       'Total Profit',
-                      'Rp${invoicesTableProvider.totalProfit.toStringAsFixed(0)}',
+                      Rupiah.toStringFormated(ProviderStreamInovices
+                          .totalNetProfit), // Memformat total profit menjadi Rupiah
                       Colors.purple,
                     ),
+                    // Total Paid
                     _buildSummaryCard(
                       'Paid',
-                      'Rp${invoicesTableProvider.totalPaid.toStringAsFixed(0)}',
+                      Rupiah.toStringFormated(ProviderStreamInovices
+                          .totalPaid), // Memformat total paid menjadi Rupiah
                       Colors.teal,
                     ),
+                    // Total Unpaid
                     _buildSummaryCard(
                       'Unpaid',
-                      'Rp${invoicesTableProvider.totalUnpaid.toStringAsFixed(0)}',
+                      Rupiah.toStringFormated(ProviderStreamInovices
+                          .totalUnpaid), // Memformat total unpaid menjadi Rupiah
                       Colors.orange,
                     ),
+                    // Total Invoices
                     _buildSummaryCard(
                       'Invoices',
-                      '${invoicesTableProvider.invoices.length} items',
+                      ProviderStreamInovices.invoices.length
+                          .toString(), // Menampilkan jumlah invoice (bukan angka dengan format)
                       Colors.indigo,
                     ),
+                    // Paid Invoices
                     _buildSummaryCard(
                       'Paid Invoices',
-                      '${invoicesTableProvider.paidInvoicesCount}',
+                      ProviderStreamInovices.paidInvoicesCount
+                          .toString(), // Menampilkan jumlah invoice lunas
                       Colors.green,
                     ),
+                    // Unpaid Invoices
                     _buildSummaryCard(
                       'Unpaid Invoices',
-                      '${invoicesTableProvider.unpaidInvoicesCount}',
+                      ProviderStreamInovices.unpaidInvoicesCount
+                          .toString(), // Menampilkan jumlah invoice belum lunas
                       Colors.red,
                     ),
                   ],
@@ -145,7 +170,6 @@ class _InvoicesTableStreamState extends State<InvoicesTableStream> {
                                 TableBorder.all(color: Colors.grey.shade300),
                             columns: const [
                               DataColumn(label: Text("No")),
-                              DataColumn(label: Text("ID")),
                               DataColumn(label: Text("Date")),
                               DataColumn(label: Text("Recipient")),
                               DataColumn(label: Text("School")),
@@ -156,6 +180,10 @@ class _InvoicesTableStreamState extends State<InvoicesTableStream> {
                                   label: Text("Discount"), numeric: true),
                               DataColumn(label: Text("Tax"), numeric: true),
                               DataColumn(label: Text("Total"), numeric: true),
+                              DataColumn(label: Text("HPP"), numeric: true),
+                              DataColumn(
+                                  label: Text("Biaya komisi"), numeric: true),
+                              DataColumn(label: Text("Profit"), numeric: true),
                               DataColumn(
                                   label: Text("DownPayment"), numeric: true),
                               DataColumn(label: Text("Status")),
@@ -172,16 +200,6 @@ class _InvoicesTableStreamState extends State<InvoicesTableStream> {
 
                                 return DataRow(cells: [
                                   DataCell(Text(globalIndex.toString())),
-                                  DataCell(
-                                    Tooltip(
-                                      message: invoice.id,
-                                      child: Text(
-                                        invoice.id.length > 8
-                                            ? '${invoice.id.substring(0, 8)}...'
-                                            : invoice.id,
-                                      ),
-                                    ),
-                                  ),
                                   DataCell(Text(invoice.displayDate)),
                                   DataCell(
                                     ConstrainedBox(
@@ -216,6 +234,9 @@ class _InvoicesTableStreamState extends State<InvoicesTableStream> {
                                       ),
                                     ),
                                   ),
+                                  DataCell(Text("Rp${invoice.totalCostPrice}")),
+                                  DataCell(Text("Rp${invoice.biayakomisi}")),
+                                  DataCell(Text("Rp${invoice.netProfit}")),
                                   DataCell(
                                     Text(
                                       "Rp${invoice.downPayment.toStringAsFixed(0)}",
@@ -283,6 +304,13 @@ class _InvoicesTableStreamState extends State<InvoicesTableStream> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showInvoiceDetails(Invoice invoice) {
+    showDialog(
+      context: context,
+      builder: (context) => InvoiceDetailsDialog(invoice: invoice),
     );
   }
 
@@ -374,258 +402,17 @@ class _InvoicesTableStreamState extends State<InvoicesTableStream> {
       ),
     );
   }
-void _showInvoiceDetails(Invoice invoice) {
-  showDialog(
-    context: context,
-    builder: (context) => Dialog(
-      insetPadding: EdgeInsets.all(20),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 600),
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Header
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'INVOICE DETAILS',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue[800],
-                      ),
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.close),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ],
-                ),
-                Divider(thickness: 2),
-                SizedBox(height: 16),
-
-                // Invoice Information
-                Text(
-                  'INVOICE INFORMATION',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[700],
-                  ),
-                ),
-                SizedBox(height: 12),
-                _buildInfoRow('Invoice ID', invoice.id),
-                _buildInfoRow('Date', invoice.displayDate),
-                _buildInfoRow('Status', invoice.paid ? 'PAID' : 'UNPAID', 
-                  color: invoice.paid ? Colors.green : Colors.orange),
-                SizedBox(height: 16),
-
-                // Customer Information
-                Text(
-                  'CUSTOMER INFORMATION',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[700],
-                  ),
-                ),
-                SizedBox(height: 12),
-                _buildInfoRow('Recipient', invoice.recipient),
-                _buildInfoRow('School', invoice.school),
-                _buildInfoRow('Address', invoice.address),
-                _buildInfoRow('Phone', invoice.noHp.isNotEmpty ? invoice.formattedPhoneNumber : '-'),
-                SizedBox(height: 16),
-
-                // Items List
-                Text(
-                  'ITEMS (${invoice.items.length})',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[700],
-                  ),
-                ),
-                SizedBox(height: 12),
-                if (invoice.items.isEmpty)
-                  Text('No items', style: TextStyle(color: Colors.grey))
-                else
-                  ...invoice.items.map((item) => _buildItemRow(item)).toList(),
-                SizedBox(height: 16),
-
-                // Financial Summary
-                Text(
-                  'FINANCIAL SUMMARY',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[700],
-                  ),
-                ),
-                SizedBox(height: 12),
-                _buildAmountRow('Subtotal', invoice.total),
-                _buildAmountRow('Discount (${invoice.discount}%)', -invoice.totalDiscount),
-                _buildAmountRow('After Discount', invoice.totalAfterDiscount),
-                _buildAmountRow('Tax (${invoice.tax}%)', invoice.totalTax),
-                Divider(thickness: 2),
-                _buildAmountRow('TOTAL', invoice.total, isTotal: true),
-                SizedBox(height: 8),
-                _buildAmountRow('Down Payment', invoice.downPayment),
-                _buildAmountRow('Remaining Payment', invoice.remainingPayment,
-                  color: invoice.remainingPayment > 0 ? Colors.red : Colors.green),
-                SizedBox(height: 16),
-
-                // Additional Information
-                Text(
-                  'ADDITIONAL INFORMATION',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[700],
-                  ),
-                ),
-                SizedBox(height: 12),
-                _buildInfoRow('Total Books', '${invoice.totalBooks} pcs'),
-                _buildInfoRow('Total Cost Price', 'Rp${invoice.totalCostPrice}'),
-                _buildInfoRow('Gross Profit', 'Rp${invoice.grossProfit.toStringAsFixed(0)}',
-                  color: invoice.grossProfit >= 0 ? Colors.green : Colors.red),
-                _buildInfoRow('Database Date', invoice.databaseDate),
-                _buildInfoRow('Customer Info Complete', invoice.hasCustomerInfo ? 'Yes' : 'No',
-                  color: invoice.hasCustomerInfo ? Colors.green : Colors.orange),
-                if (invoice.noHp.isNotEmpty)
-                  _buildInfoRow('Phone Valid', invoice.hasValidPhoneNumber ? 'Yes' : 'No',
-                    color: invoice.hasValidPhoneNumber ? Colors.green : Colors.red),
-                
-                SizedBox(height: 24),
-                
-                // Action Buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: Text('Close'),
-                    ),
-                    SizedBox(width: 8),
-                   
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    ),
-  );
-}
-
-// Helper Widget untuk menampilkan informasi
-Widget _buildInfoRow(String label, String value, {Color? color}) {
-  return Padding(
-    padding: EdgeInsets.symmetric(vertical: 4),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 150,
-          child: Text(
-            '$label:',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-        ),
-        SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            value,
-            style: TextStyle(color: color),
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-// Helper Widget untuk menampilkan amount
-Widget _buildAmountRow(String label, double amount, {bool isTotal = false, Color? color}) {
-  final amountText = 'Rp${amount.toStringAsFixed(0)}';
-  return Padding(
-    padding: EdgeInsets.symmetric(vertical: 4),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
-          ),
-        ),
-        Text(
-          amountText,
-          style: TextStyle(
-            fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
-            color: color ?? (amount < 0 ? Colors.red : null),
-            fontSize: isTotal ? 16 : null,
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-// Helper Widget untuk menampilkan item
-Widget _buildItemRow(InvoiceItem item) {
-  return Card(
-    margin: EdgeInsets.symmetric(vertical: 4),
-    child: Padding(
-      padding: EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            item.book.name,
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 4),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('Qty: ${item.quantity}'),
-              Text('Price: Rp${item.sellingPrice}'),
-              Text('Total: Rp${item.totalPrice}'),
-            ],
-          ),
-          SizedBox(height: 4),
-          Text(
-            'Cost: Rp${item.book.costPrice} each',
-            style: TextStyle(color: Colors.grey[600], fontSize: 12),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-// Fungsi untuk export PDF (placeholder)
-void _exportInvoice(Invoice invoice) {
-  // Implementasi export PDF di sini
-  print('Exporting invoice: ${invoice.id}');
-  // Biasanya menggunakan package seperti pdf, printing, dll.
-}
 
   void _editInvoice(Invoice invoice) {
     context.read<Invoice>().updateFromInvoice(invoice);
     Navigator.of(context).push(MaterialPageRoute(
       builder: (context) => Scaffold(
-         
-          body: SizedBox(width: 1000,
-            child: InoviceForm(
-              update: true,
-            ),
-          )),
+          body: SizedBox(
+        width: 1000,
+        child: InoviceForm(
+          update: true,
+        ),
+      )),
     ));
     // showDialog(
     //   context: context,
@@ -654,7 +441,7 @@ void _exportInvoice(Invoice invoice) {
 Widget _buildSummaryCard(String title, String value, Color color) {
   return Card(
     elevation: 2,
-    color: color.withOpacity(0.1),
+    color: Colors.white,
     child: Padding(
       padding: const EdgeInsets.all(12.0),
       child: Column(

@@ -23,7 +23,8 @@ class CreateInvoiceCustomer extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: TextFormField(controller: invoice.textEditingControllerRecipient,
+              child: TextFormField(
+                controller: invoice.textEditingControllerRecipient,
                 decoration: InputDecoration(
                   labelText: 'Recipient Name',
                   border: OutlineInputBorder(),
@@ -36,7 +37,8 @@ class CreateInvoiceCustomer extends StatelessWidget {
               width: 10,
             ),
             Expanded(
-              child: TextFormField(controller: invoice.textEditingControllerSchool,
+              child: TextFormField(
+                controller: invoice.textEditingControllerSchool,
                 decoration: InputDecoration(
                   labelText: 'School',
                   border: OutlineInputBorder(),
@@ -49,7 +51,8 @@ class CreateInvoiceCustomer extends StatelessWidget {
               width: 10,
             ),
             Expanded(
-              child: TextFormField(controller: invoice.textEditingControllerAdreess,
+              child: TextFormField(
+                controller: invoice.textEditingControllerAdreess,
                 decoration: InputDecoration(
                   labelText: 'Address',
                   border: OutlineInputBorder(),
@@ -57,10 +60,13 @@ class CreateInvoiceCustomer extends StatelessWidget {
                 ),
                 onChanged: (value) => invoice.updateAddress(value),
               ),
-            ),  SizedBox(
+            ),
+            SizedBox(
               width: 10,
-            ), Expanded(
-              child: TextFormField(controller: invoice.textEditingControllerNoHp,
+            ),
+            Expanded(
+              child: TextFormField(
+                controller: invoice.textEditingControllerNoHp,
                 decoration: InputDecoration(
                   labelText: 'Phone',
                   border: OutlineInputBorder(),
@@ -129,6 +135,27 @@ class CreateInvoiceCustomer extends StatelessWidget {
                 keyboardType: TextInputType.number,
                 onChanged: (value) {
                   invoice.updateDownPayment(Rupiah.toDouble(value));
+                },
+              ),
+            ),
+            SizedBox(
+              width: 10,
+            ),
+            Expanded(
+              child: TextFormField(
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  CurrencyInputFormatter(),
+                ],
+                decoration: InputDecoration(
+                  labelText: 'Biaya komisi',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.money_off_csred_rounded),
+                ),
+                initialValue: invoice.biayakomisi.toString(),
+                keyboardType: TextInputType.number,
+                onChanged: (value) {
+                  invoice.updatebiayakomisi(Rupiah.toDouble(value));
                 },
               ),
             ),

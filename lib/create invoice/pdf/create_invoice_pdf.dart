@@ -10,7 +10,8 @@ import 'package:image/image.dart' as img;
 
 class InvoicePdfService {
   // Constants
-  static const String _companyName = 'Gubuk Pustaka Harmoni';
+  
+  static const String _companyName = 'CV Gubuk Pustaka Harmoni';
   static const String _companyAddress = 
       'Dusun 2, Pilangrejo, Kec. Gemolong,\nKabupaten Sragen Jawa Tengah 57274';
   static const String _companyPhone = '0812-3456-7890';

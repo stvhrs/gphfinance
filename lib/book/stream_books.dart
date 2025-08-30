@@ -116,7 +116,7 @@ class _BookTableStreamState extends State<BookTableStream> {
                                   DataCell(
                                     ConstrainedBox(
                                       constraints:
-                                          BoxConstraints(maxWidth: 150),
+                                          BoxConstraints(maxWidth: 300),
                                       child: Text(
                                         book.name,
                                         overflow: TextOverflow.ellipsis,
@@ -126,7 +126,7 @@ class _BookTableStreamState extends State<BookTableStream> {
                                   DataCell(
                                     ConstrainedBox(
                                       constraints:
-                                          BoxConstraints(maxWidth: 150),
+                                          BoxConstraints(maxWidth: 300),
                                       child: Text(
                                         Rupiah.toStringFormated(
                                             book.costPrice.toDouble()),

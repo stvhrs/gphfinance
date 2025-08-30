@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gphfinance/create%20invoice/button_pushfirebase_invoices.dart';
+import 'package:gphfinance/invoice_detail.dart';
 import 'package:gphfinance/model.dart';
 import 'package:gphfinance/provider/provider_invoices_table.dart';
 import 'package:provider/provider.dart';
@@ -25,13 +26,18 @@ class CreateInvoicesTable extends StatelessWidget {
                       Colors.green,
                     ),
                     _buildSummaryCard(
-                      'Total Cost',
+                      'Total HPP',
                       'Rp${InvoicesTableProvider.totalCost.toStringAsFixed(0)}',
                       Colors.blue,
                     ),
                     _buildSummaryCard(
+                      'Total komisi',
+                      'Rp${InvoicesTableProvider.totalBiayakomisi.toStringAsFixed(0)}',
+                      Colors.blue,
+                    ),
+                    _buildSummaryCard(
                       'Total Profit',
-                      'Rp${InvoicesTableProvider.totalProfit.toStringAsFixed(0)}',
+                      'Rp${InvoicesTableProvider.totalNetProfit.toStringAsFixed(0)}',
                       Colors.purple,
                     ),
                     _buildSummaryCard(
@@ -97,113 +103,115 @@ class CreateInvoicesTable extends StatelessWidget {
                       DataColumn(label: Text('Status'), numeric: true),
                       DataColumn(label: Text('Actions'), numeric: true),
                     ],
-                    rows:
-                        InvoicesTableProvider.invoices.map((invoice) {
-                          return DataRow(
-                            cells: [
-                              DataCell(
-                                Tooltip(
-                                  message: invoice.id,
-                                  child: Text(invoice.id.substring(0, 8)),
+                    rows: InvoicesTableProvider.invoices.map((invoice) {
+                      return DataRow(
+                        cells: [
+                          DataCell(
+                            Tooltip(
+                              message: invoice.id,
+                              child: Text(invoice.id.substring(0, 8)),
+                            ),
+                          ),
+                          DataCell(Text(invoice.displayDate)),
+                          DataCell(
+                            Text(
+                              invoice.recipient.isNotEmpty
+                                  ? invoice.school
+                                  : '-',
+                            ),
+                          ),
+                          DataCell(Text(
+                              '${invoice.items.fold(0, (sum, item) => sum + item.quantity)}')),
+                          DataCell(Text('Rp${invoice.subTotal}')),
+                          DataCell(Text('${invoice.discount}%')),
+                          DataCell(Text('${invoice.tax}%')),
+                          DataCell(
+                            Text(
+                              'Rp${invoice.total.toStringAsFixed(0)}',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blue,
+                              ),
+                            ),
+                          ),
+                          DataCell(
+                            Text(
+                              'Rp${invoice.downPayment.toStringAsFixed(0)}',
+                              style: TextStyle(
+                                color: invoice.downPayment > 0
+                                    ? Colors.green
+                                    : Colors.grey,
+                              ),
+                            ),
+                          ),
+                          DataCell(
+                            Chip(
+                              label: Text(
+                                invoice.paid ? 'PAID' : 'UNPAID',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
                                 ),
                               ),
-                              DataCell(Text(invoice.displayDate)),
-                              DataCell(
-                                Text(
-                                  invoice.recipient.isNotEmpty
-                                      ? invoice.school
-                                      : '-',
-                                ),
+                              backgroundColor:
+                                  invoice.paid ? Colors.green : Colors.orange,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
                               ),
-                              DataCell(Text('${invoice.items.fold(0,  (sum, item) => sum + item.quantity)}')),
-                              DataCell(Text('Rp${invoice.subTotal}')),
-                              DataCell(Text('${invoice.discount}%')),
-                              DataCell(Text('${invoice.tax}%')),
-                              DataCell(
-                                Text(
-                                  'Rp${invoice.total.toStringAsFixed(0)}',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.blue,
+                            ),
+                          ),
+                          DataCell(
+                            Row(
+                              children: [
+                                IconButton(
+                                  icon: Icon(Icons.visibility, size: 18),
+                                  onPressed: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) =>
+                                          InvoiceDetailsDialog(
+                                              invoice: invoice),
+                                    );
+                                  },
+                                ),
+                                IconButton(
+                                  icon: Icon(
+                                    Icons.delete,
+                                    size: 18,
+                                    color: Colors.red,
                                   ),
+                                  onPressed: () {
+                                    _deleteInvoice(
+                                      context,
+                                      InvoicesTableProvider,
+                                      invoice,
+                                    );
+                                  },
                                 ),
-                              ),
-                              DataCell(
-                                Text(
-                                  'Rp${invoice.downPayment.toStringAsFixed(0)}',
-                                  style: TextStyle(
-                                    color:
-                                        invoice.downPayment > 0
-                                            ? Colors.green
-                                            : Colors.grey,
-                                  ),
-                                ),
-                              ),
-                              DataCell(
-                                Chip(
-                                  label: Text(
-                                    invoice.paid ? 'PAID' : 'UNPAID',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                  backgroundColor:
-                                      invoice.paid
-                                          ? Colors.green
-                                          : Colors.orange,
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 2,
-                                  ),
-                                ),
-                              ),
-                              DataCell(
-                                Row(
-                                  children: [
-                                    IconButton(
-                                      icon: Icon(Icons.visibility, size: 18),
-                                      onPressed: () {
-                                        _viewInvoiceDetails(context, invoice);
-                                      },
-                                    ),
-                                   
-                                    IconButton(
-                                      icon: Icon(
-                                        Icons.delete,
-                                        size: 18,
-                                        color: Colors.red,
-                                      ),
-                                      onPressed: () {
-                                        _deleteInvoice(
-                                          context,
-                                          InvoicesTableProvider,
-                                          invoice,
-                                        );
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          );
-                        }).toList(),
-                        
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    }).toList(),
                   ),
                 );
               },
             ),
-          ),PushInvoicesButton()
+          ),
+          PushInvoicesButton()
         ],
       ),
     );
   }
 
   Widget _buildSummaryCard(String title, String value, Color color) {
-    return Container(
+    return Card(
+      elevation: 2,
       color: color.withOpacity(0.1),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(12.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -273,8 +281,6 @@ class CreateInvoicesTable extends StatelessWidget {
       },
     );
   }
-
-  
 
   void _deleteInvoice(
     BuildContext context,

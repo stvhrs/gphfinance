@@ -7,11 +7,10 @@ class ProviderStreamInovices with ChangeNotifier {
 
   List<Invoice> get invoices => _invoices;
   Invoice? get selectedInvoce => _selectedInvoce;
-  void selectinvoce(
-    Invoice invoce,
-  ) {
+
+  void selectinvoce(Invoice invoce) {
     _selectedInvoce = invoce;
-    notifyListeners() ;
+    notifyListeners();
   }
 
   /// Total harga dari semua invoice (total penjualan)
@@ -24,9 +23,39 @@ class ProviderStreamInovices with ChangeNotifier {
     return _invoices.fold(0, (sum, invoice) => sum + invoice.totalCostPrice);
   }
 
-  /// Total profit dari semua invoice
-  double get totalProfit {
+  /// TOTAL komisi - VARIABLE BARU
+  double get totalkomisi {
+    return _invoices.fold(0, (sum, invoice) => sum + invoice.biayakomisi);
+  }
+
+  /// Total cost sales dari semua invoice
+  double get totalCostSales {
+    return _invoices.fold(0, (sum, invoice) => sum + invoice.biayakomisi);
+  }
+
+  /// Total semua biaya (HPP + cost sales + komisi)
+  double get totalAllCosts {
+    return totalCost + totalCostSales + totalkomisi;
+  }
+
+  /// Total profit kotor (sales - HPP)
+  double get totalGrossProfit {
     return totalSales - totalCost;
+  }
+
+  /// Total profit bersih (sales - semua biaya)
+  double get totalNetProfit {
+    return totalSales - totalAllCosts;
+  }
+
+  /// Margin profit kotor dalam persentase
+  double get grossProfitMargin {
+    return totalSales > 0 ? (totalGrossProfit / totalSales) * 100 : 0;
+  }
+
+  /// Margin profit bersih dalam persentase
+  double get netProfitMargin {
+    return totalSales > 0 ? (totalNetProfit / totalSales) * 100 : 0;
   }
 
   /// Total yang sudah dibayar (down payment)
@@ -49,15 +78,48 @@ class ProviderStreamInovices with ChangeNotifier {
     return _invoices.where((invoice) => !invoice.paid).length;
   }
 
+  /// Rata-rata nilai invoice
+  double get averageInvoiceValue {
+    return _invoices.isNotEmpty ? totalSales / _invoices.length : 0;
+  }
+
+  /// Invoice dengan nilai tertinggi
+  Invoice? get highestValueInvoice {
+    if (_invoices.isEmpty) return null;
+    return _invoices.reduce((a, b) => a.total > b.total ? a : b);
+  }
+
+  /// Invoice dengan nilai terendah
+  Invoice? get lowestValueInvoice {
+    if (_invoices.isEmpty) return null;
+    return _invoices.reduce((a, b) => a.total < b.total ? a : b);
+  }
+
+  /// Invoice dengan biaya komisi tertinggi - METHOD BARU
+  Invoice? get highestkomisiInvoice {
+    if (_invoices.isEmpty) return null;
+    return _invoices.reduce((a, b) => a.biayakomisi > b.biayakomisi ? a : b);
+  }
+
+  /// Rata-rata biaya komisi per invoice - METHOD BARU
+  double get averagekomisiPerInvoice {
+    return _invoices.isNotEmpty ? totalkomisi / _invoices.length : 0;
+  }
+
+  /// Persentase biaya komisi terhadap total sales - METHOD BARU
+  double get komisiToSalesRatio {
+    return totalSales > 0 ? (totalkomisi / totalSales) * 100 : 0;
+  }
+
   /// Add new invoice
   void addInvoice(Invoice invoice, {bool listen = true}) {
     _invoices.add(invoice);
-    listen ? notifyListeners() : "";
+    if (listen) notifyListeners();
   }
 
   void setInvoices(List<Invoice> invoices, {bool listen = true}) {
     _invoices = invoices;
-    listen ? notifyListeners() : "";
+    if (listen) notifyListeners();
   }
 
   /// Remove invoice
@@ -99,5 +161,114 @@ class ProviderStreamInovices with ChangeNotifier {
   /// Convert all invoices to JSON list
   List<Map<dynamic, dynamic>> toJsonList() {
     return _invoices.map((invoice) => invoice.toJson()).toList();
+  }
+
+  /// Filter invoices by date range
+  List<Invoice> filterByDateRange(DateTime startDate, DateTime endDate) {
+    return _invoices
+        .where((invoice) =>
+            invoice.date.isAfter(startDate.subtract(const Duration(days: 1))) &&
+            invoice.date.isBefore(endDate.add(const Duration(days: 1))))
+        .toList();
+  }
+
+  /// Filter invoices by status (paid/unpaid)
+  List<Invoice> filterByStatus(bool paid) {
+    return _invoices.where((invoice) => invoice.paid == paid).toList();
+  }
+
+  /// Filter invoices by school
+  List<Invoice> filterBySchool(String school) {
+    return _invoices.where((invoice) => invoice.school == school).toList();
+  }
+
+  /// Filter invoices dengan biaya komisi di atas threshold - METHOD BARU
+  List<Invoice> filterBykomisiThreshold(double threshold) {
+    return _invoices
+        .where((invoice) => invoice.biayakomisi >= threshold)
+        .toList();
+  }
+
+  /// Get total sales for a specific date range
+  double getSalesByDateRange(DateTime startDate, DateTime endDate) {
+    final filteredInvoices = filterByDateRange(startDate, endDate);
+    return filteredInvoices.fold(0, (sum, invoice) => sum + invoice.total);
+  }
+
+  /// Get total komisi for a specific date range - METHOD BARU
+  double getkomisiByDateRange(DateTime startDate, DateTime endDate) {
+    final filteredInvoices = filterByDateRange(startDate, endDate);
+    return filteredInvoices.fold(
+        0, (sum, invoice) => sum + invoice.biayakomisi);
+  }
+
+  // /// Get total profit for a specific date range
+  // double getProfitByDateRange(DateTime startDate, DateTime endDate) {
+  //   final filteredInvoices = filterByDateRange(startDate, endDate);
+  //   final totalSales = filteredInvoices.fold(0, (sum, invoice) => sum + invoice.total);
+  //   final totalCosts = filteredInvoices.fold(0, (sum, invoice) =>
+  //     sum + invoice.totalCostPrice  + invoice.biayakomisi);
+  //   return totalSales - totalCosts;
+  // }
+
+  /// Get summary statistics termasuk komisi - METHOD BARU
+  Map<String, dynamic> getSummary() {
+    return {
+      'totalInvoices': _invoices.length,
+      'totalSales': totalSales,
+      'totalCost': totalCost,
+      'totalCostSales': totalCostSales,
+      'totalkomisi': totalkomisi,
+      'totalGrossProfit': totalGrossProfit,
+      'totalNetProfit': totalNetProfit,
+      'grossProfitMargin': grossProfitMargin,
+      'netProfitMargin': netProfitMargin,
+      'totalPaid': totalPaid,
+      'totalUnpaid': totalUnpaid,
+      'paidInvoicesCount': paidInvoicesCount,
+      'unpaidInvoicesCount': unpaidInvoicesCount,
+      'averageInvoiceValue': averageInvoiceValue,
+      'averagekomisiPerInvoice': averagekomisiPerInvoice,
+      'komisiToSalesRatio': komisiToSalesRatio,
+    };
+  }
+
+  /// Get komisi analysis - METHOD BARU
+  Map<String, dynamic> getkomisiAnalysis() {
+    final highestkomisi = highestkomisiInvoice;
+
+    return {
+      'totalkomisi': totalkomisi,
+      'averagekomisiPerInvoice': averagekomisiPerInvoice,
+      'komisiToSalesRatio': komisiToSalesRatio,
+      'highestkomisiInvoice': highestkomisi?.id,
+      'highestkomisiAmount': highestkomisi?.biayakomisi ?? 0,
+      'invoicesWithkomisi': _invoices.where((i) => i.biayakomisi > 0).length,
+      'percentageWithkomisi': _invoices.isNotEmpty
+          ? (_invoices.where((i) => i.biayakomisi > 0).length /
+                  _invoices.length) *
+              100
+          : 0,
+    };
+  }
+
+  /// Export data komisi untuk reporting - METHOD BARU
+  List<Map<String, dynamic>> exportkomisiData() {
+    return _invoices
+        .map((invoice) => {
+              'invoiceId': invoice.id,
+              'date': invoice.displayDate,
+              'school': invoice.school,
+              'recipient': invoice.recipient,
+              'totalSales': invoice.total,
+              'totalCost': invoice.totalCostPrice,
+              'biayakomisi': invoice.biayakomisi,
+              'netProfit': invoice.netProfit,
+              'komisiPercentage': invoice.total > 0
+                  ? (invoice.biayakomisi / invoice.total) * 100
+                  : 0,
+              'paidStatus': invoice.paid ? 'Paid' : 'Unpaid',
+            })
+        .toList();
   }
 }

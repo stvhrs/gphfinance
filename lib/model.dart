@@ -138,7 +138,8 @@ class Invoice with ChangeNotifier {
   String address; // alamat
   String recipient; // penerima
   String school; // sekolah
-  String noHp; // nomor handphone - VARIABLE BARU
+  String noHp; // nomor handphone
+  double biayakomisi; // VARIABLE BARU: Harga Pokok Penjualan (HPP)
 
   Invoice({
     this.items = const [],
@@ -148,10 +149,11 @@ class Invoice with ChangeNotifier {
     this.paid = false,
     DateTime? date,
     String? id,
-    this.address = '', // default empty
-    this.recipient = '', // default empty
-    this.school = '', // default empty
-    this.noHp = '', // default empty - VARIABLE BARU
+    this.address = '',
+    this.recipient = '',
+    this.school = '',
+    this.noHp = '',
+    this.biayakomisi = 0, // VARIABLE BARU: default 0
   })  : id = id ?? DateTime.now().millisecondsSinceEpoch.toString(),
         date = date ?? DateTime.now();
 
@@ -163,18 +165,21 @@ class Invoice with ChangeNotifier {
   TextEditingController textEditingControllerRecipient =
       TextEditingController();
   TextEditingController textEditingControllerSchool = TextEditingController();
-  TextEditingController textEditingControllerNoHp =
+  TextEditingController textEditingControllerNoHp = TextEditingController();
+  TextEditingController textEditingControllerbiayakomisi =
       TextEditingController(); // CONTROLLER BARU
 
   resetCustomerInfo() {
     textEditingControllerSchool.clear();
     textEditingControllerRecipient.clear();
     textEditingControllerAdreess.clear();
-    textEditingControllerNoHp.clear(); // CLEAR BARU
+    textEditingControllerNoHp.clear();
+    textEditingControllerbiayakomisi.clear(); // CLEAR BARU
     address = '';
     recipient = "";
     school = "";
-    noHp = ""; // RESET BARU
+    noHp = "";
+    biayakomisi = 0; // RESET BARU
     id = DateTime.now().millisecondsSinceEpoch.toString();
     notifyListeners();
   }
@@ -193,7 +198,8 @@ class Invoice with ChangeNotifier {
       address: address,
       recipient: recipient,
       school: school,
-      noHp: noHp, // TAMBAHAN BARU
+      noHp: noHp,
+      biayakomisi: biayakomisi, // TAMBAHAN BARU
       items: [],
     );
 
@@ -222,7 +228,8 @@ class Invoice with ChangeNotifier {
       address: address,
       recipient: recipient,
       school: school,
-      noHp: noHp, // TAMBAHAN BARU
+      noHp: noHp,
+      biayakomisi: biayakomisi, // TAMBAHAN BARU
       items: [],
     );
 
@@ -248,7 +255,7 @@ class Invoice with ChangeNotifier {
   }
 
   /// Total cost price from all items (sum of all costPrice * quantity)
-  int get totalCostPrice {
+  double get totalCostPrice {
     return items.fold(
       0,
       (sum, item) => sum + (item.book.costPrice * item.quantity),
@@ -274,6 +281,9 @@ class Invoice with ChangeNotifier {
   double get total {
     return totalAfterDiscount + totalTax;
   }
+   bool get isPaid {
+    return downPayment == total;
+  }
 
   /// Remaining payment after down payment
   double get remainingPayment {
@@ -285,9 +295,24 @@ class Invoice with ChangeNotifier {
     return items.fold(0, (sum, item) => sum + item.quantity);
   }
 
-  /// Gross profit (total sales - total cost price)
+  /// Gross profit (total sales - total cost price - cost sales)
   double get grossProfit {
-    return total - totalCostPrice;
+    return total - totalCostPrice - biayakomisi;
+  }
+
+  /// Gross profit margin (gross profit / total sales)
+  double get grossProfitMargin {
+    return total > 0 ? (grossProfit / total) * 100 : 0;
+  }
+
+  /// Net profit (gross profit - additional costs)
+  double get netProfit {
+    return grossProfit;
+  }
+
+  /// Total cost (cost of goods + cost sales)
+  double get totalCost {
+    return totalCostPrice + biayakomisi;
   }
 
   /// Date format for display (example: "12 Jan 2024")
@@ -322,6 +347,11 @@ class Invoice with ChangeNotifier {
     return noHp;
   }
 
+  /// Format cost sales untuk display
+  String get formattedbiayakomisi {
+    return 'Rp${biayakomisi.toStringAsFixed(0)}';
+  }
+
   // METHODS ================================================================
 
   /// Convert to JSON
@@ -337,7 +367,8 @@ class Invoice with ChangeNotifier {
       'address': address,
       'recipient': recipient,
       'school': school,
-      'noHp': noHp, // TAMBAHAN BARU
+      'noHp': noHp,
+      'biayakomisi': biayakomisi, // TAMBAHAN BARU
     };
   }
 
@@ -356,7 +387,8 @@ class Invoice with ChangeNotifier {
       address: json['address'] ?? '',
       recipient: json['recipient'] ?? '',
       school: json['school'] ?? '',
-      noHp: json['noHp'] ?? '', // TAMBAHAN BARU
+      noHp: json['noHp'] ?? '',
+      biayakomisi: json['biayakomisi'] ?? 0, // TAMBAHAN BARU
     );
   }
 
@@ -437,9 +469,26 @@ class Invoice with ChangeNotifier {
     notifyListeners();
   }
 
-  /// Update phone number - METHOD BARU
+  /// Update phone number
   void updatePhoneNumber(String newNoHp) {
     noHp = newNoHp;
+    notifyListeners();
+  }
+
+  /// Update cost sales - METHOD BARU
+  void updatebiayakomisi(double newbiayakomisi) {
+    biayakomisi = newbiayakomisi;
+    notifyListeners();
+  }
+
+  /// Update cost sales from string - METHOD BARU
+  void updatebiayakomisiFromString(String value) {
+    final cleanedValue = value.replaceAll(RegExp(r'[^0-9]'), '');
+    if (cleanedValue.isNotEmpty) {
+      biayakomisi = double.parse(cleanedValue);
+    } else {
+      biayakomisi = 0;
+    }
     notifyListeners();
   }
 
@@ -448,12 +497,14 @@ class Invoice with ChangeNotifier {
     String? address,
     String? recipient,
     String? school,
-    String? noHp, // PARAMETER BARU
+    String? noHp,
+    double? biayakomisi, // PARAMETER BARU
   }) {
     if (address != null) this.address = address;
     if (recipient != null) this.recipient = recipient;
     if (school != null) this.school = school;
-    if (noHp != null) this.noHp = noHp; // TAMBAHAN BARU
+    if (noHp != null) this.noHp = noHp;
+    if (biayakomisi != null) this.biayakomisi = biayakomisi; // TAMBAHAN BARU
     notifyListeners();
   }
 
@@ -462,11 +513,12 @@ class Invoice with ChangeNotifier {
     address = '';
     recipient = '';
     school = '';
-    noHp = ''; // TAMBAHAN BARU
+    noHp = '';
+    biayakomisi = 0; // TAMBAHAN BARU
     notifyListeners();
   }
 
-  /// Validate phone number - METHOD BARU
+  /// Validate phone number
   String? validatePhoneNumber() {
     if (noHp.isEmpty) {
       return 'Nomor HP harus diisi';
@@ -476,6 +528,14 @@ class Invoice with ChangeNotifier {
     }
     if (!RegExp(r'^[0-9+]+$').hasMatch(noHp)) {
       return 'Nomor HP hanya boleh mengandung angka dan tanda +';
+    }
+    return null;
+  }
+
+  /// Validate cost sales - METHOD BARU
+  String? validatebiayakomisi() {
+    if (biayakomisi < 0) {
+      return 'Cost sales tidak boleh negatif';
     }
     return null;
   }
@@ -498,25 +558,44 @@ class Invoice with ChangeNotifier {
     ];
     return months[month - 1];
   }
+
   void updateFromInvoice(Invoice otherInvoice) {
-  id = otherInvoice.id;
-  items = List<InvoiceItem>.from(otherInvoice.items);
-  discount = otherInvoice.discount;
-  tax = otherInvoice.tax;
-  downPayment = otherInvoice.downPayment;
-  paid = otherInvoice.paid;
-  date = otherInvoice.date;
-  address = otherInvoice.address;
-  recipient = otherInvoice.recipient;
-  school = otherInvoice.school;
-  noHp = otherInvoice.noHp;
-  
-  // Update juga text editing controllers jika diperlukan
-  textEditingControllerAdreess.text = otherInvoice.address;
-  textEditingControllerRecipient.text = otherInvoice.recipient;
-  textEditingControllerSchool.text = otherInvoice.school;
-  textEditingControllerNoHp.text = otherInvoice.noHp;
-  
-  notifyListeners();
-}
+    id = otherInvoice.id;
+    items = List<InvoiceItem>.from(otherInvoice.items);
+    discount = otherInvoice.discount;
+    tax = otherInvoice.tax;
+    downPayment = otherInvoice.downPayment;
+    paid = otherInvoice.paid;
+    date = otherInvoice.date;
+    address = otherInvoice.address;
+    recipient = otherInvoice.recipient;
+    school = otherInvoice.school;
+    noHp = otherInvoice.noHp;
+    biayakomisi = otherInvoice.biayakomisi; // TAMBAHAN BARU
+
+    // Update text editing controllers
+    textEditingControllerAdreess.text = otherInvoice.address;
+    textEditingControllerRecipient.text = otherInvoice.recipient;
+    textEditingControllerSchool.text = otherInvoice.school;
+    textEditingControllerNoHp.text = otherInvoice.noHp;
+    textEditingControllerbiayakomisi.text =
+        otherInvoice.biayakomisi.toString(); // TAMBAHAN BARU
+
+    notifyListeners();
+  }
+
+  /// Calculate break-even point - METHOD BARU
+  double get breakEvenPoint {
+    return totalCostPrice + biayakomisi;
+  }
+
+  /// Calculate profit percentage - METHOD BARU
+  double get profitPercentage {
+    return total > 0 ? (grossProfit / total) * 100 : 0;
+  }
+
+  /// Check if invoice is profitable - METHOD BARU
+  bool get isProfitable {
+    return grossProfit > 0;
+  }
 }

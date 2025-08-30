@@ -15,39 +15,51 @@ class PdfView extends StatefulWidget {
   const PdfView({super.key, required this.documentType, required this.invoice});
 
   @override
-  State<PdfView> createState() => _TahunPrintState();
+  State<PdfView> createState() => _PdfViewState();
 }
 
-class _TahunPrintState extends State<PdfView> {
+class _PdfViewState extends State<PdfView> {
   void _showPrintedToast(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Document printed successfully'),
-      ),
-    );
-  }
-
-  void _showSharedToast(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Document shared successfully'),
-      ),
+      const SnackBar(content: Text('Document printed successfully')),
     );
   }
 
   Future<Uint8List> _generatePdf() async {
+    Uint8List data;
     switch (widget.documentType) {
       case "Create Delivery Note":
-        return await DeliveryNotePdfGenerator.generateDeliveryNotePdf(widget.invoice);
+        data = await DeliveryNotePdfGenerator.generateDeliveryNotePdf(
+            widget.invoice);
+        _sharePdf(data, widget.invoice.id.replaceAll("INV", "SJ"));
+        return data;
+
       case "Create Payment Receipt":
-        return await PaymentReceiptPdfGenerator.generatePaymentReceiptPdf(widget.invoice);
+        data = await PaymentReceiptPdfGenerator.generatePaymentReceiptPdf(
+            widget.invoice);
+        _sharePdf(data, widget.invoice.id.replaceAll("INV", "NT"));
+        return data;
+
       case "Create PO":
-        return await PurchaseOrderPdfGenerator.generatePurchaseOrderPdf(widget.invoice);
+        data = await PurchaseOrderPdfGenerator.generatePurchaseOrderPdf(
+            widget.invoice);
+        _sharePdf(data, widget.invoice.id.replaceAll("INV", "PO"));
+        return data;
+
       case "Create Invoice":
-        return await InvoicePdfService.generate(widget.invoice);
+        data = await InvoicePdfService.generate(widget.invoice);
+        _sharePdf(data, widget.invoice.id);
+        return data;
+
       default:
-        return await CombinedPdfGenerator.generateCombinedPdf(widget.invoice);
+        data = await CombinedPdfGenerator.generateCombinedPdf(widget.invoice);
+        _sharePdf(data, widget.invoice.id);
+        return data;
     }
+  }
+
+  void _sharePdf(Uint8List data, String filename) async {
+    await Printing.sharePdf(bytes: data, filename: filename);
   }
 
   @override
@@ -55,37 +67,20 @@ class _TahunPrintState extends State<PdfView> {
     return Scaffold(
       body: Theme(
         data: ThemeData(
-          iconTheme: const IconThemeData(
-            color: Colors.white,
-          ),
+          iconTheme: const IconThemeData(color: Colors.white),
           primaryColor: const Color.fromARGB(255, 59, 59, 65),
         ),
         child: PdfPreview(
-                loadingWidget: const Text('Loading...'),
-                onError: (context, error) => const Text('Error...'),
-                maxPageWidth: 800,
-                pdfFileName: widget.invoice.id,
-                canDebug: false,
-                allowSharing: false,
-                build: (format)async{
-                  switch (widget.documentType) {
-      case "Create Delivery Note":
-        return await DeliveryNotePdfGenerator.generateDeliveryNotePdf(widget.invoice);
-      case "Create Payment Receipt":
-        return await PaymentReceiptPdfGenerator.generatePaymentReceiptPdf(widget.invoice);
-      case "Create PO":
-        return await PurchaseOrderPdfGenerator.generatePurchaseOrderPdf(widget.invoice);
-      case "Create Invoice":
-        return await InvoicePdfService.generate(widget.invoice);
-      default:
-        return await CombinedPdfGenerator.generateCombinedPdf(widget.invoice);
-    }
-                },  // Use the generated Uint8List data
-                onPrinted: _showPrintedToast,
-                canChangeOrientation: false,
-                canChangePageFormat: false,
-              
-          
+          loadingWidget: const Text('Loading...'),
+          onError: (context, error) => const Text('Error...'),
+          maxPageWidth: 800,
+          pdfFileName: widget.invoice.id,
+          canDebug: false,
+          allowSharing: false,
+          build: (format) async => _generatePdf(),
+          onPrinted: _showPrintedToast,
+          canChangeOrientation: false,
+          canChangePageFormat: false,
         ),
       ),
     );

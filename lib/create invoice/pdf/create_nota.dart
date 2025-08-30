@@ -1,75 +1,159 @@
-import 'package:flutter/material.dart';
-import 'package:gphfinance/model.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
-import 'package:intl/date_symbol_data_local.dart';
+import 'dart:typed_data';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
-import 'dart:io';
-import 'package:flutter/services.dart' show ByteData, Uint8List, rootBundle;
+import 'package:pdf/widgets.dart' as pw;
+import 'package:pdf/pdf.dart';
+import 'package:gphfinance/model.dart';
+import 'package:gphfinance/helper/rupiah_format.dart';
 import 'package:image/image.dart' as img;
 
 class PaymentReceiptPdfGenerator {
-  static Future<dynamic> generatePaymentReceiptPdf(
-    Invoice invoice, {
-    Uint8List? directorSignature,
-    String companyName = 'PT. BUKU EDUKASI INDONESIA',
-    String companyAddress = 'Jl. Pendidikan No. 123, Jakarta Selatan',
-    String companyPhone = '(021) 1234-5678',
-    bool returnPage = false,
-    String companyEmail = 'info@bukuedukasi.com',
-    bool isPaid = false, // New parameter to indicate payment status
-  }) async {
-    final pdf = pw.Document();
-    final dateFormat = DateFormat('dd MMMM yyyy', 'id_ID');
-    final currencyFormat =
-        NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+  // Constants
 
-    // Load logo and "Lunas" image
-    final logo = await _loadLogoImage();
-    final lunasImage = isPaid ? await _loadLunasImage() : null;
+  static const String _companyName = 'CV Gubuk Pustaka Harmoni';
+  static const String _companyAddress =
+      'Dusun 2, Pilangrejo, Kec. Gemolong,\nKabupaten Sragen Jawa Tengah 57274';
+  static const String _companyPhone = '0812-3456-7890';
+  static const String _website = 'GUBUKPUSTAKAHARMONI.COM';
+  static const String _email = 'cvgubukpustakaharmoni@gmail.com';
+  static const String _bankAccount = '13800-2675-3595';
+  static const String _directorName = 'Zulfikar Ali';
+  static const String _directorPosition = 'Director';
+  static const String _contactPhone = '0856 0172 1370';
 
-    var multiPage = pw.MultiPage(
-      pageFormat: PdfPageFormat.a4,
-      margin: const pw.EdgeInsets.all(40),
-      build: (context) => [
-        _buildHeader(logo, companyName),
-        pw.SizedBox(height: 20),
-        _buildCompanyInfo(companyAddress, companyPhone, companyEmail),
-        pw.SizedBox(height: 30),
-        _buildInvoiceInfo(invoice, dateFormat),
-        pw.SizedBox(height: 20),
-        _buildItemsTable(invoice, currencyFormat),
-        pw.SizedBox(height: 20),
-        _buildTotals(invoice, currencyFormat),
-        if (lunasImage != null) ...[
-          pw.SizedBox(height: 30),
-          _buildLunasImage(lunasImage),
-        ],
-        pw.SizedBox(height: 30),
-        _buildDirectorSignature(directorSignature),
-        pw.SizedBox(height: 20),
-        _buildTermsAndConditions(),
-      ],
-    );
-    pdf.addPage(
-      multiPage,
-    );
-    if (returnPage) {
-      return multiPage;
-    }
-   else {
-      return await pdf.save();
-    }
+  // Text Styles
+  static final _textStyles = _TextStyles();
+  static final _colors = _Colors();
+
+  // Font loading
+  static Future<Map<String, pw.Font>> _loadFonts() async {
+    final fontData = await rootBundle.load('assets/Roboto-Regular.ttf');
+    final fontDataBold = await rootBundle.load('assets/Roboto-Bold.ttf');
+
+    return {
+      'regular': pw.Font.ttf(fontData.buffer.asByteData()),
+      'bold': pw.Font.ttf(fontDataBold.buffer.asByteData()),
+    };
   }
-
-  static Future<pw.MemoryImage> _loadLogoImage() async {
+static pw.Widget _buildSignatureSection(pw.MemoryImage ttd) {
+  return pw.Column(
+    crossAxisAlignment: pw.CrossAxisAlignment.start,
+    children: [
+      // Bagian Hormat Kami (Pengirim)
+      pw.Row(
+        crossAxisAlignment: pw.CrossAxisAlignment.end,
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        children: [
+          // Kolom Pengirim
+          pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text(
+                'Hormat Kami,',
+                style: pw.TextStyle(
+                  fontWeight: pw.FontWeight.bold,
+                  fontSize: 10,
+                ),
+              ),
+              pw.SizedBox(height: 2),
+              pw.Text(
+                'CV Gubuk Pustaka Harmoni',
+                style: pw.TextStyle(
+                  fontSize: 10,
+                ),
+              ),
+             
+              
+            
+              pw.Container(
+                width: 150,child:
+                 pw.Column(
+          mainAxisAlignment: pw.MainAxisAlignment.end,crossAxisAlignment: pw.CrossAxisAlignment.center,
+          children: [
+            pw.Image(ttd, width: 120, height: 40),
+            pw.Text(_directorName+", "+_directorPosition, style: _textStyles.mediumBold),
+           
+          ],
+        ) ,
+                height: 80,
+                decoration: pw.BoxDecoration(
+                  border: pw.Border(
+                    bottom: pw.BorderSide(width: 1, color: PdfColors.black),
+                  ),
+                ),
+              ),
+              pw.SizedBox(height: 4),
+              pw.Text(
+                '(tanda tangan)',
+                style: pw.TextStyle(
+                  fontSize: 8,
+                  fontStyle: pw.FontStyle.italic,
+                ),
+              ),
+              pw.SizedBox(height: 20),
+           
+            ],
+          ),
+          
+          // Spacer antara kolom pengirim dan penerima
+          pw.SizedBox(width: 60),
+          
+          // Kolom Penerima
+          pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text(
+                'Tanda Tangan Pembeli,',
+                style: pw.TextStyle(
+                  fontWeight: pw.FontWeight.bold,
+                  fontSize: 10,
+                ),
+              ),
+            
+                
+              // Garis untuk tanda tangan penerima
+              pw.Container(
+                width: 150,
+                height: 80,
+                decoration: pw.BoxDecoration(
+                  border: pw.Border(
+                    bottom: pw.BorderSide(width: 1, color: PdfColors.black),
+                  ),
+                ),
+              ),
+              pw.SizedBox(height: 4),
+              pw.Text(
+                '(tanda tangan)',
+                style: pw.TextStyle(
+                  fontSize: 8,
+                  fontStyle: pw.FontStyle.italic,
+                ),
+              ),
+              pw.SizedBox(height: 20),
+             
+            ],
+          ),
+        ],
+      ),
+      
+      pw.SizedBox(height: 20),
+    ],
+  );
+}
+  // Image loading with fallback
+  static Future<pw.MemoryImage> _loadImage(
+    String assetPath, {
+    int width = 60,
+    int height = 60,
+  }) async {
     try {
-      final ByteData data = await rootBundle.load('assets/logo.png');
+      final ByteData data = await rootBundle.load(assetPath);
       final Uint8List bytes = data.buffer.asUint8List();
       return pw.MemoryImage(bytes);
     } catch (e) {
-      print('Logo not found: $e');
-      final image = img.Image(width: 60, height: 60);
+      print('Image not found ($assetPath): $e');
+      final image = img.Image(width: width, height: height);
       final pngBytes = img.encodePng(image);
       return pw.MemoryImage(pngBytes);
     }
@@ -88,29 +172,93 @@ class PaymentReceiptPdfGenerator {
     }
   }
 
-  static pw.Widget _buildHeader(pw.MemoryImage logo, String companyName) {
-    return pw.Row(
-      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+  static Future<dynamic> generatePaymentReceiptPdf(
+    Invoice invoice, {
+    bool returnPage = false,
+  }) async {
+    final lunas = invoice.isPaid? await _loadLunasImage():null;
+
+    final pdf = pw.Document();
+    final fonts = await _loadFonts();
+    final dateFmt = DateFormat('dd MMM yyyy', 'id_ID');
+
+    final logo = await _loadImage('assets/logo.png', width: 35, height: 35);
+    final mandiri =
+        await _loadImage('assets/mandiri.png', width: 120, height: 30);
+    final ttd = await _loadImage('assets/ttd.png', width: 120, height: 40);
+
+    final page = pw.MultiPage(
+      theme: pw.ThemeData.withFont(
+        base: fonts['regular']!,
+        bold: fonts['bold']!,
+        fontFallback: [fonts['bold']!],
+      ),
+      margin: const pw.EdgeInsets.symmetric(horizontal: 48, vertical: 48),
+      build: (context) => [
+        _buildHeader(logo),
+        pw.SizedBox(height: 24),
+        _buildBillTo(invoice, dateFmt),
+        pw.SizedBox(height: 18),
+        _buildItemsTable(invoice),
+        pw.SizedBox(height: 12),
+        _buildTotals(invoice,lunas??null),
+        pw.SizedBox(height: 48),
+        _buildSignatureSection(ttd),
+        pw.SizedBox(height: 18),
+
+        _buildFooter(ttd),
+        pw.Divider(),
+        _buildFooterNote(),
+      ],
+    );
+
+    pdf.addPage(page);
+    return returnPage ? page : await pdf.save();
+  }
+
+  // Header Section
+  static pw.Widget _buildHeader(pw.MemoryImage logo) {
+    return pw.Column(
       children: [
-        pw.Image(logo, width: 120, height: 60),
-        pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.end,
+        pw.Row(
+          crossAxisAlignment: pw.CrossAxisAlignment.center,
           children: [
-            pw.Text(
-              'PAYMENT RECEIPT',
-              style: pw.TextStyle(
-                fontSize: 24,
-                fontWeight: pw.FontWeight.bold,
-                color: PdfColors.blue800,
+            pw.Image(logo, width: 35, height: 35),
+            pw.Container(
+              padding: const pw.EdgeInsets.all(8),
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Text(
+                    _companyName,
+                    style: _textStyles.xLargeBold
+                        .copyWith(color: _colors.green800),
+                  ),
+                  pw.SizedBox(height: 2),
+                  pw.Text(
+                    "PENERBIT DAN PERCETAKAN",
+                    style: _textStyles.small.copyWith(color: _colors.grey900),
+                  ),
+                ],
               ),
             ),
-            pw.SizedBox(height: 5),
+            pw.Spacer(),
             pw.Text(
-              companyName,
-              style: pw.TextStyle(
-                fontSize: 12,
-                fontWeight: pw.FontWeight.bold,
-              ),
+              'Nota Pembayaran',
+              style: _textStyles.title.copyWith(color: _colors.green800),
+            ),
+          ],
+        ),
+        pw.Row(
+          crossAxisAlignment: pw.CrossAxisAlignment.center,
+          children: [
+            pw.Container(width: 50, color: _colors.green800, height: 2),
+            pw.Expanded(
+              child: pw.Container(color: PdfColors.grey, height: 1.5),
+            ),
+            pw.Text(
+              "   $_website",
+              style: _textStyles.small.copyWith(color: _colors.grey900),
             ),
           ],
         ),
@@ -118,408 +266,278 @@ class PaymentReceiptPdfGenerator {
     );
   }
 
-  static pw.Widget _buildCompanyInfo(
-      String address, String phone, String email) {
+  // Bill To Section
+  static pw.Widget _buildBillTo(Invoice invoice, DateFormat dateFmt) {
     return pw.Container(
-      padding: const pw.EdgeInsets.all(15),
+      padding: const pw.EdgeInsets.all(16),
       decoration: pw.BoxDecoration(
-        border: pw.Border.all(color: PdfColors.grey300, width: 1),
-        borderRadius: pw.BorderRadius.circular(5),
+        borderRadius: pw.BorderRadius.circular(8),
+        color: _colors.grey200,
       ),
       child: pw.Row(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Text('Alamat:',
-                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-              pw.Text(address),
-              pw.SizedBox(height: 8),
-              pw.Text('Telepon:',
-                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-              pw.Text(phone),
-            ],
-          ),
-          pw.SizedBox(width: 40),
-          pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Text('Email:',
-                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-              pw.Text(email),
-              pw.SizedBox(height: 8),
-              pw.Text('Website:',
-                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-              pw.Text('www.bukuedukasi.com'),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  static pw.Widget _buildInvoiceInfo(Invoice invoice, DateFormat dateFormat) {
-    return pw.Container(
-      padding: const pw.EdgeInsets.all(15),
-      decoration: pw.BoxDecoration(
-        border: pw.Border.all(color: PdfColors.grey300, width: 1),
-        borderRadius: pw.BorderRadius.circular(5),
-      ),
-      child: pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
-        children: [
-          pw.Text(
-            'INFORMASI PEMESANAN',
-            style: pw.TextStyle(
-              fontSize: 14,
-              fontWeight: pw.FontWeight.bold,
-              color: PdfColors.blue800,
-            ),
-          ),
-          pw.SizedBox(height: 15),
-          pw.Row(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  pw.Text('No. PO: ',
-                      style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-                  pw.Text('Tanggal PO: ',
-                      style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-                  pw.Text('Penerima: ',
-                      style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-                  pw.Text('Sekolah: ',
-                      style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-                  pw.Text('Alamat: ',
-                      style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-                ],
-              ),
-              pw.SizedBox(width: 20),
-              pw.Expanded(
-                child: pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.start,
-                  children: [
-                    pw.Text('PO-${invoice.id}'),
-                    pw.Text(dateFormat.format(invoice.date)),
-                    pw.Text(
-                        invoice.recipient.isNotEmpty ? invoice.recipient : '-'),
-                    pw.Text(invoice.school.isNotEmpty ? invoice.school : '-'),
-                    pw.Text(invoice.address.isNotEmpty ? invoice.address : '-'),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  static pw.Widget _buildItemsTable(
-      Invoice invoice, NumberFormat currencyFormat) {
-    return pw.Table(
-      border: pw.TableBorder.all(color: PdfColors.grey300, width: 1),
-      columnWidths: {
-        0: const pw.FlexColumnWidth(1),
-        1: const pw.FlexColumnWidth(3),
-        2: const pw.FlexColumnWidth(1.5),
-        3: const pw.FlexColumnWidth(1.5),
-        4: const pw.FlexColumnWidth(1.5),
-      },
-      children: [
-        // Table header
-        pw.TableRow(
-          decoration: pw.BoxDecoration(color: PdfColors.grey200),
-          children: [
-            pw.Padding(
-              padding: const pw.EdgeInsets.all(8),
-              child: pw.Text(
-                'No',
-                style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-                textAlign: pw.TextAlign.center,
-              ),
-            ),
-            pw.Padding(
-              padding: const pw.EdgeInsets.all(8),
-              child: pw.Text(
-                'Nama Buku',
-                style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-              ),
-            ),
-            pw.Padding(
-              padding: const pw.EdgeInsets.all(8),
-              child: pw.Text(
-                'Harga Satuan',
-                style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-                textAlign: pw.TextAlign.right,
-              ),
-            ),
-            pw.Padding(
-              padding: const pw.EdgeInsets.all(8),
-              child: pw.Text(
-                'Qty',
-                style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-                textAlign: pw.TextAlign.center,
-              ),
-            ),
-            pw.Padding(
-              padding: const pw.EdgeInsets.all(8),
-              child: pw.Text(
-                'Total',
-                style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-                textAlign: pw.TextAlign.right,
-              ),
-            ),
-          ],
-        ),
-        // Table items
-        ...invoice.items.asMap().entries.map((entry) {
-          int index = entry.key + 1;
-          InvoiceItem item = entry.value;
-
-          return pw.TableRow(
-            children: [
-              pw.Padding(
-                padding: const pw.EdgeInsets.all(8),
-                child: pw.Text(
-                  index.toString(),
-                  textAlign: pw.TextAlign.center,
-                ),
-              ),
-              pw.Padding(
-                padding: const pw.EdgeInsets.all(8),
-                child: pw.Text(item.book.name),
-              ),
-              pw.Padding(
-                padding: const pw.EdgeInsets.all(8),
-                child: pw.Text(
-                  currencyFormat.format(item.sellingPrice),
-                  textAlign: pw.TextAlign.right,
-                ),
-              ),
-              pw.Padding(
-                padding: const pw.EdgeInsets.all(8),
-                child: pw.Text(
-                  item.quantity.toString(),
-                  textAlign: pw.TextAlign.center,
-                ),
-              ),
-              pw.Padding(
-                padding: const pw.EdgeInsets.all(8),
-                child: pw.Text(
-                  currencyFormat.format(item.totalPrice),
-                  textAlign: pw.TextAlign.right,
-                ),
-              ),
-            ],
-          );
-        }).toList(),
-      ],
-    );
-  }
-
-  static pw.Widget _buildTotals(Invoice invoice, NumberFormat currencyFormat) {
-    return pw.Container(
-      alignment: pw.Alignment.centerRight,
-      child: pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.end,
-        children: [
-          pw.Row(
-            mainAxisAlignment: pw.MainAxisAlignment.end,
-            children: [
-              pw.SizedBox(
-                width: 150,
-                child: pw.Text('Subtotal: ',
-                    style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-              ),
-              pw.SizedBox(width: 10),
-              pw.SizedBox(
-                width: 100,
-                child: pw.Text(currencyFormat.format(invoice.subTotal),
-                    textAlign: pw.TextAlign.right),
-              ),
-            ],
-          ),
-          pw.SizedBox(height: 5),
-          pw.Row(
-            mainAxisAlignment: pw.MainAxisAlignment.end,
-            children: [
-              pw.SizedBox(
-                width: 150,
-                child: pw.Text('Diskon (${invoice.discount}%): ',
-                    style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-              ),
-              pw.SizedBox(width: 10),
-              pw.SizedBox(
-                width: 100,
-                child: pw.Text(currencyFormat.format(invoice.totalDiscount),
-                    textAlign: pw.TextAlign.right),
-              ),
-            ],
-          ),
-          pw.SizedBox(height: 5),
-          pw.Row(
-            mainAxisAlignment: pw.MainAxisAlignment.end,
-            children: [
-              pw.SizedBox(
-                width: 150,
-                child: pw.Text('Pajak (${invoice.tax}%): ',
-                    style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-              ),
-              pw.SizedBox(width: 10),
-              pw.SizedBox(
-                width: 100,
-                child: pw.Text(currencyFormat.format(invoice.totalTax),
-                    textAlign: pw.TextAlign.right),
-              ),
-            ],
-          ),
-          pw.Divider(),
-          pw.Row(
-            mainAxisAlignment: pw.MainAxisAlignment.end,
-            children: [
-              pw.SizedBox(
-                width: 150,
-                child: pw.Text('TOTAL: ',
-                    style: pw.TextStyle(
-                        fontSize: 14, fontWeight: pw.FontWeight.bold)),
-              ),
-              pw.SizedBox(width: 10),
-              pw.SizedBox(
-                width: 100,
-                child: pw.Text(
-                  currencyFormat.format(invoice.total),
-                  style: const pw.TextStyle(fontSize: 14),
-                  textAlign: pw.TextAlign.right,
-                ),
-              ),
-            ],
-          ),
-          pw.SizedBox(height: 10),
-          pw.Row(
-            mainAxisAlignment: pw.MainAxisAlignment.end,
-            children: [
-              pw.SizedBox(
-                width: 150,
-                child: pw.Text('DP: ',
-                    style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-              ),
-              pw.SizedBox(width: 10),
-              pw.SizedBox(
-                width: 100,
-                child: pw.Text(currencyFormat.format(invoice.downPayment),
-                    textAlign: pw.TextAlign.right),
-              ),
-            ],
-          ),
-          pw.SizedBox(height: 5),
-          pw.Row(
-            mainAxisAlignment: pw.MainAxisAlignment.end,
-            children: [
-              pw.SizedBox(
-                width: 150,
-                child: pw.Text('Sisa: ',
-                    style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-              ),
-              pw.SizedBox(width: 10),
-              pw.SizedBox(
-                width: 100,
-                child: pw.Text(
-                  currencyFormat.format(invoice.remainingPayment),
-                  textAlign: pw.TextAlign.right,
-                  style: pw.TextStyle(
-                      color: invoice.remainingPayment > 0
-                          ? PdfColors.red
-                          : PdfColors.green),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  static pw.Widget _buildLunasImage(pw.MemoryImage lunasImage) {
-    return pw.Center(
-      child: pw.Image(lunasImage, width: 150, height: 50),
-    );
-  }
-
-  static pw.Widget _buildDirectorSignature(Uint8List? signatureImage) {
-    return pw.Column(
-      children: [
-        pw.Row(
-          mainAxisAlignment: pw.MainAxisAlignment.end,
-          children: [
-            pw.Column(
+          pw.Expanded(
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
+                pw.Text('Kepada:', style: _textStyles.normal),
+                pw.SizedBox(height: 4),
                 pw.Text(
-                    'Jakarta, ${DateFormat('dd MMMM yyyy', 'id_ID').format(DateTime.now())}'),
-                pw.SizedBox(height: 40),
-                if (signatureImage != null)
-                  pw.Image(pw.MemoryImage(signatureImage),
-                      width: 150, height: 80)
-                else
-                  pw.Container(
-                    width: 150,
-                    height: 80,
-                    decoration: pw.BoxDecoration(
-                      border: pw.Border.all(color: PdfColors.grey),
-                    ),
-                    child: pw.Center(
-                      child: pw.Text('Tanda Tangan Direktur',
-                          style: const pw.TextStyle(fontSize: 10)),
-                    ),
-                  ),
-                pw.SizedBox(height: 10),
-                pw.Text(
-                  '(_________________________)',
-                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                  invoice.school.isEmpty ? '-' : invoice.school,
+                  style: _textStyles.largeBold,
                 ),
+                pw.SizedBox(height: 6),
                 pw.Text(
-                  'Direktur',
-                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                  invoice.recipient.isEmpty ? '-' : invoice.recipient,
+                  style: _textStyles.small,
                 ),
-                pw.Text('PT. BUKU EDUKASI INDONESIA'),
+                pw.SizedBox(height: 2),
+                pw.Text(
+                  invoice.noHp.isEmpty ? '-' : invoice.noHp,
+                  style: _textStyles.small,
+                ),
+                pw.SizedBox(height: 2),
+                pw.Text(
+                  invoice.address.isEmpty ? '-' : invoice.address,
+                  style: _textStyles.small,
+                ),
               ],
             ),
+          ),
+          pw.Spacer(),
+          pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text(
+                'Nota no : ${invoice.id.replaceAll("INV", "NT")}',
+                style: _textStyles.mediumBold,
+              ),
+              pw.SizedBox(height: 4),
+              pw.Text(
+                dateFmt.format(invoice.date),
+                style: _textStyles.normal,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Items Table Section
+  static pw.Widget _buildItemsTable(Invoice invoice) {
+    final headers = ['No', 'Judul Buku', 'Qty', 'Harga', 'Total'];
+    final data = invoice.items.asMap().entries.map((entry) {
+      final i = entry.key;
+      final item = entry.value;
+      return [
+        (i + 1).toString(),
+        item.book.name,
+        item.quantity.toString(),
+        Rupiah.toStringFormated(item.sellingPrice.toDouble()),
+        Rupiah.toStringFormated(item.totalPrice.toDouble()),
+      ];
+    }).toList();
+
+    return pw.Table.fromTextArray(
+      headers: headers,
+      data: data,
+      headerStyle: _textStyles.smallBold.copyWith(color: _colors.white),
+      headerDecoration: pw.BoxDecoration(color: _colors.green800),
+      cellAlignments: {
+        0: pw.Alignment.center,
+        1: pw.Alignment.centerLeft,
+        2: pw.Alignment.center,
+        3: pw.Alignment.centerRight,
+        4: pw.Alignment.centerRight,
+      },
+      cellStyle: _textStyles.small,
+      headerHeight: 24,
+      cellHeight: 24,
+      cellDecoration: (index, data, rowNum) {
+        return pw.BoxDecoration(
+          color: rowNum.isOdd ? _colors.green100 : _colors.green50,
+        );
+      },
+      border: null,
+    );
+  }
+
+  // Totals Section
+  static pw.Widget _buildTotals(Invoice invoice, pw.MemoryImage? lunas) {
+
+    return
+        pw.Row(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+           !invoice.isPaid?pw.SizedBox():    pw.Image((lunas!),width: 150),
+             pw.Spacer(),
+            pw.Container(
+              width: 200,
+              child: pw.Column(
+                children: [
+                  _buildKeyValueRow(
+                    'Subtotal',
+                    Rupiah.toStringFormated(invoice.subTotal.toDouble()),
+                  ),
+                  _buildKeyValueRow(
+                    'Diskon (${invoice.discount.toStringAsFixed(0)}%)',
+                    '- ${Rupiah.toStringFormated(invoice.totalDiscount)}',
+                  ),
+                  _buildKeyValueRow(
+                    'PPN (${invoice.tax.toStringAsFixed(0)}%)',
+                    '+ ${Rupiah.toStringFormated(invoice.totalTax)}',
+                  ),  _buildKeyValueRow(
+                    'Uang Muka / Di Bayar',
+                    '- ${Rupiah.toStringFormated(invoice.downPayment)}',
+                  ),
+                  pw.Divider(),
+                  pw.Container(
+                    padding: const pw.EdgeInsets.symmetric(horizontal: 6),
+                    height: 24,
+                    decoration: pw.BoxDecoration(color: _colors.green800),
+                    child: _buildKeyValueRowBold(
+                      'Total',
+                      Rupiah.toStringFormated(invoice.remainingPayment),
+                      color: _colors.white,
+                    ),
+                  ),
+              
+                ],
+              ),
+            ),
+           
           ],
+        
+    );
+  }
+
+  // Footer Section
+  static pw.Widget _buildFooter(pw.MemoryImage ttd) {
+    return pw.Row(
+      crossAxisAlignment: pw.CrossAxisAlignment.end,
+      children: [
+        pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Text('Catatan:', style: _textStyles.smallBold),
+            pw.SizedBox(height: 4),
+            pw.Text(
+              '• Nota pembayaran ini merupakan bukti sah transaksi. Mohon simpan nota ini dengan baik untuk keperluan klaim atau penukaran.',
+              style: _textStyles.small,
+            ),
+            pw.Text(
+              '• Pembayaran dianggap lunas setelah dana diterima penuh.',
+              style: _textStyles.small,
+            ),
+            pw.Text(
+              '• Harga yang tertera pada nota sudah final dan termasuk PPN (jika ada).',
+              style: _textStyles.small,
+            ),
+            pw.SizedBox(height: 12),
+          ],
+        ),
+        pw.Spacer(),
+       
+      ],
+    );
+  }
+
+  // Footer Note
+  static pw.Widget _buildFooterNote() {
+    return pw.Row(
+      children: [
+        pw.Text(
+          "Pilangrejo, Gemolong, Sragen Regency - $_website - $_email - $_contactPhone",
+          style: _textStyles.small.copyWith(color: _colors.grey700),
         ),
       ],
     );
   }
 
-  static pw.Widget _buildTermsAndConditions() {
-    return pw.Container(
-      padding: const pw.EdgeInsets.all(15),
-      decoration: pw.BoxDecoration(
-        border: pw.Border.all(color: PdfColors.grey300, width: 1),
-        borderRadius: pw.BorderRadius.circular(5),
-      ),
-      child: pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
+  // Helper methods
+  static pw.Widget _buildKeyValueRow(String key, String value) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(vertical: 2),
+      child: pw.Row(
         children: [
-          pw.Text(
-            'SYARAT DAN KETENTUAN',
-            style: pw.TextStyle(
-              fontSize: 14,
-              fontWeight: pw.FontWeight.bold,
-              color: PdfColors.blue800,
-            ),
-          ),
-          pw.SizedBox(height: 10),
-          pw.Text('1. Pembayaran: 50% saat pemesanan, 50% saat pengiriman'),
-          pw.Text('2. Waktu pengiriman: 7-14 hari kerja setelah konfirmasi PO'),
-          pw.Text(
-              '3. Garansi: Buku dapat ditukar dalam kondisi cacat produksi'),
-          pw.Text(
-              '4. Complain: Dilayani maksimal 3 hari setelah penerimaan barang'),
-          pw.Text('5. PO ini berlaku selama 30 hari kalender'),
+          pw.Expanded(child: pw.Text(key, style: _textStyles.small)),
+          pw.Text(value, style: _textStyles.small),
         ],
       ),
     );
   }
+
+  static pw.Widget _buildKeyValueRowBold(String key, String value,
+      {PdfColor? color}) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(vertical: 2),
+      child: pw.Row(
+        children: [
+          pw.Expanded(
+            child: pw.Text(
+              key,
+              style: _textStyles.mediumBold.copyWith(color: color),
+            ),
+          ),
+          pw.Text(
+            value,
+            style: _textStyles.mediumBold.copyWith(color: color),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static pw.Widget _buildBankInfoRow(String label, String value) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(vertical: 2),
+      child: pw.Row(
+        children: [
+          pw.Text(label, style: _textStyles.small),
+          pw.Text(
+            value,
+            style: _textStyles.medium.copyWith(
+              color: _colors.green800,
+              fontWeight: pw.FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Text Styles Helper Class
+class _TextStyles {
+  final pw.TextStyle small = pw.TextStyle(fontSize: 9);
+  final pw.TextStyle smallBold =
+      pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold);
+  final pw.TextStyle normal = pw.TextStyle(fontSize: 10);
+  final pw.TextStyle normalBold =
+      pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold);
+  final pw.TextStyle medium = pw.TextStyle(fontSize: 11);
+  final pw.TextStyle mediumBold =
+      pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold);
+  final pw.TextStyle large = pw.TextStyle(fontSize: 13);
+  final pw.TextStyle largeBold =
+      pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold);
+  final pw.TextStyle xLarge = pw.TextStyle(fontSize: 15);
+  final pw.TextStyle xLargeBold =
+      pw.TextStyle(fontSize: 15, fontWeight: pw.FontWeight.bold);
+  final pw.TextStyle title =
+      pw.TextStyle(fontSize: 23, fontWeight: pw.FontWeight.bold);
+}
+
+// Colors Helper Class
+class _Colors {
+  final PdfColor green800 = PdfColors.green800;
+  final PdfColor green100 = PdfColors.green100;
+  final PdfColor green50 = PdfColors.green50;
+  final PdfColor grey200 = PdfColors.grey200;
+  final PdfColor grey400 = PdfColors.grey400;
+  final PdfColor grey700 = PdfColors.grey700;
+  final PdfColor grey900 = PdfColors.grey900;
+  final PdfColor white = PdfColors.white;
 }
