@@ -29,6 +29,30 @@ class AllPDF {
   // Text Styles
   static final _textStyles = _TextStyles();
   static final _colors = _Colors();
+  Future<Uint8List> generateAllDocuments(List<Invoice> invoices) async {
+    final pdf = pw.Document();
+    final fonts = await AllPDF._loadFonts();
+    final dateFmt = DateFormat('dd MMM yyyy', 'id_ID');
+    final logo =
+        await AllPDF._loadImage('assets/logo.png', width: 35, height: 35);
+    final mandiri =
+        await AllPDF._loadImage('assets/mandiri.png', width: 120, height: 30);
+    final ttd =
+        await AllPDF._loadImage('assets/ttd.png', width: 120, height: 40);
+
+    for (final invoice in invoices) {
+      pdf.addPage(AllPDF._buildInvoicePage(
+          invoice, dateFmt, fonts, logo, mandiri, ttd));
+      pdf.addPage(AllPDF._buildNotaPage(invoice, dateFmt, fonts, logo, ttd,
+          invoice.isPaid ? await AllPDF._loadLunasImage() : null));
+      pdf.addPage(AllPDF._buildPurchaseOrderPage(
+          invoice, dateFmt, fonts, logo, mandiri, ttd));
+      pdf.addPage(
+          AllPDF._buildSuratJalanPage(invoice, dateFmt, fonts, logo, ttd));
+    }
+
+    return await pdf.save();
+  }
 
   // Main function to generate documents
   static Future<dynamic> generateDocument({
@@ -39,7 +63,8 @@ class AllPDF {
     final fonts = await _loadFonts();
     final dateFmt = DateFormat('dd MMM yyyy', 'id_ID');
     final logo = await _loadImage('assets/logo.png', width: 35, height: 35);
-    final mandiri = await _loadImage('assets/mandiri.png', width: 120, height: 30);
+    final mandiri =
+        await _loadImage('assets/mandiri.png', width: 120, height: 30);
     final ttd = await _loadImage('assets/ttd.png', width: 120, height: 40);
     final lunas = invoice.isPaid ? await _loadLunasImage() : null;
 
@@ -47,14 +72,16 @@ class AllPDF {
 
     if (type == DocumentType.allDocuments) {
       // Generate semua dokumen dalam satu file PDF
-      pdf.addPage(_buildInvoicePage(invoice, dateFmt, fonts, logo, mandiri, ttd));
+      pdf.addPage(
+          _buildInvoicePage(invoice, dateFmt, fonts, logo, mandiri, ttd));
       pdf.addPage(_buildNotaPage(invoice, dateFmt, fonts, logo, ttd, lunas));
-      pdf.addPage(_buildPurchaseOrderPage(invoice, dateFmt, fonts, logo, mandiri, ttd));
+      pdf.addPage(
+          _buildPurchaseOrderPage(invoice, dateFmt, fonts, logo, mandiri, ttd));
       pdf.addPage(_buildSuratJalanPage(invoice, dateFmt, fonts, logo, ttd));
     } else {
       // Generate dokumen tunggal
       pw.MultiPage page;
-      
+
       switch (type) {
         case DocumentType.invoice:
           page = _buildInvoicePage(invoice, dateFmt, fonts, logo, mandiri, ttd);
@@ -63,7 +90,8 @@ class AllPDF {
           page = _buildNotaPage(invoice, dateFmt, fonts, logo, ttd, lunas);
           break;
         case DocumentType.purchaseOrder:
-          page = _buildPurchaseOrderPage(invoice, dateFmt, fonts, logo, mandiri, ttd);
+          page = _buildPurchaseOrderPage(
+              invoice, dateFmt, fonts, logo, mandiri, ttd);
           break;
         case DocumentType.suratJalan:
           page = _buildSuratJalanPage(invoice, dateFmt, fonts, logo, ttd);
@@ -85,7 +113,7 @@ class AllPDF {
   static Future<Map<String, pw.Font>> _loadFonts() async {
     final fontData = await rootBundle.load('assets/Roboto-Regular.ttf');
     final fontDataBold = await rootBundle.load('assets/Roboto-Bold.ttf');
-    
+
     return {
       'regular': pw.Font.ttf(fontData.buffer.asByteData()),
       'bold': pw.Font.ttf(fontDataBold.buffer.asByteData()),
@@ -173,7 +201,8 @@ class AllPDF {
       build: (context) => [
         _buildHeader(logo, 'Nota Pembayaran'),
         pw.SizedBox(height: 24),
-        _buildBillTo(invoice, dateFmt, 'Kepada:', 'No : ${invoice.id.replaceAll("INV", "NT")}'),
+        _buildBillTo(invoice, dateFmt, 'Kepada:',
+            'No : ${invoice.id.replaceAll("INV", "NT")}'),
         pw.SizedBox(height: 18),
         _buildItemsTable(invoice, true),
         pw.SizedBox(height: 12),
@@ -206,7 +235,8 @@ class AllPDF {
       build: (context) => [
         _buildHeader(logo, 'Purchase Order'),
         pw.SizedBox(height: 24),
-        _buildBillTo(invoice, dateFmt, 'Informasi Pemesanan:', 'No : ${invoice.id.replaceAll("INV", "PO")}'),
+        _buildBillTo(invoice, dateFmt, 'Informasi Pemesanan:',
+            'No : ${invoice.id.replaceAll("INV", "PO")}'),
         pw.SizedBox(height: 18),
         _buildItemsTable(invoice, true),
         pw.SizedBox(height: 12),
@@ -238,7 +268,8 @@ class AllPDF {
       build: (context) => [
         _buildHeader(logo, 'SURAT JALAN'),
         pw.SizedBox(height: 24),
-        _buildBillTo(invoice, dateFmt, 'Penerima:', 'No : ${invoice.id.replaceAll("INV", "SJ")}'),
+        _buildBillTo(invoice, dateFmt, 'Penerima:',
+            'No : ${invoice.id.replaceAll("INV", "SJ")}'),
         pw.SizedBox(height: 18),
         _buildItemsTable(invoice, false),
         pw.SizedBox(height: 12),
@@ -259,64 +290,57 @@ class AllPDF {
   static pw.Widget _buildHeader(pw.MemoryImage logo, String title) {
     return pw.Column(
       children: [
-        pw.Row(
-          crossAxisAlignment: pw.CrossAxisAlignment.center,
-          children: [
-            pw.Image(logo, width: 35, height: 35),
-            pw.Container(
-              padding: const pw.EdgeInsets.all(8),
-              child: pw.Column(
+        pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.center, children: [
+          pw.Image(logo, width: 35, height: 35),
+          pw.Container(
+            padding: const pw.EdgeInsets.all(8),
+            child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
                   pw.Text(
                     _companyName,
-                    style: _textStyles.xLargeBold.copyWith(color: _colors.green800),
+                    style: _textStyles.xLargeBold
+                        .copyWith(color: _colors.green800),
                   ),
                   pw.SizedBox(height: 2),
                   pw.Text(
                     "PENERBIT DAN PERCETAKAN",
                     style: _textStyles.small.copyWith(color: _colors.grey900),
                   ),
-                ]
-              ),
-            ),
-            pw.Spacer(),
-            pw.Text(
-              title,
-              style: _textStyles.title.copyWith(color: _colors.green800),
-            ),
-          ]
-        ),
-        pw.Row(
-          crossAxisAlignment: pw.CrossAxisAlignment.center,
-          children: [
-            pw.Container(width: 50, color: _colors.green800, height: 2),
-            pw.Expanded(
-              child: pw.Container(color: PdfColors.grey, height: 1.5),
-            ),
-            pw.Text(
-              "   $_website",
-              style: _textStyles.small.copyWith(color: _colors.grey900),
-            ),
-          ]
-        ),
+                ]),
+          ),
+          pw.Spacer(),
+          pw.Text(
+            title,
+            style: _textStyles.title.copyWith(color: _colors.green800),
+          ),
+        ]),
+        pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.center, children: [
+          pw.Container(width: 50, color: _colors.green800, height: 2),
+          pw.Expanded(
+            child: pw.Container(color: PdfColors.grey, height: 1.5),
+          ),
+          pw.Text(
+            "   $_website",
+            style: _textStyles.small.copyWith(color: _colors.grey900),
+          ),
+        ]),
       ],
     );
   }
 
   // Bill To Section
-  static pw.Widget _buildBillTo(Invoice invoice, DateFormat dateFmt, String title, String documentNumber) {
+  static pw.Widget _buildBillTo(Invoice invoice, DateFormat dateFmt,
+      String title, String documentNumber) {
     return pw.Container(
       padding: const pw.EdgeInsets.all(16),
       decoration: pw.BoxDecoration(
         borderRadius: pw.BorderRadius.circular(8),
         color: _colors.grey200,
       ),
-      child: pw.Row(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
-        children: [
-          pw.Expanded(
-            child: pw.Column(
+      child: pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+        pw.Expanded(
+          child: pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
                 pw.Text(title, style: _textStyles.normal),
@@ -340,33 +364,28 @@ class AllPDF {
                   invoice.address.isEmpty ? '-' : invoice.address,
                   style: _textStyles.small,
                 ),
-              ]
-            ),
-          ),
-          pw.Spacer(),
-          pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Text(documentNumber, style: _textStyles.mediumBold),
-              pw.SizedBox(height: 4),
-              pw.Text(dateFmt.format(invoice.date), style: _textStyles.normal),
-        ]
-          ),
-        ]
-      ),
+              ]),
+        ),
+        pw.Spacer(),
+        pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+          pw.Text(documentNumber, style: _textStyles.mediumBold),
+          pw.SizedBox(height: 4),
+          pw.Text(dateFmt.format(invoice.date), style: _textStyles.normal),
+        ]),
+      ]),
     );
   }
 
   // Items Table Section
   static pw.Widget _buildItemsTable(Invoice invoice, bool includePrices) {
-    final headers = includePrices 
+    final headers = includePrices
         ? ['No', 'Judul Buku', 'Qty', 'Harga', 'Total']
         : ['No', 'Judul Buku', 'Qty'];
-    
+
     final data = invoice.items.asMap().entries.map((entry) {
       final i = entry.key;
       final item = entry.value;
-      
+
       if (includePrices) {
         return [
           (i + 1).toString(),
@@ -401,7 +420,7 @@ class AllPDF {
               0: pw.Alignment.center,
               1: pw.Alignment.centerLeft,
               2: pw.Alignment.center,
-          },
+            },
       cellStyle: _textStyles.small,
       headerHeight: 24,
       cellHeight: 24,
@@ -565,21 +584,24 @@ class AllPDF {
       children: [
         pw.Column(
           children: [
-            pw.Text('Pengirim', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+            pw.Text('Pengirim',
+                style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
             pw.SizedBox(height: 60),
             pw.Text('(_________________________)'),
           ],
         ),
         pw.Column(
           children: [
-            pw.Text('Sopir', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+            pw.Text('Sopir',
+                style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
             pw.SizedBox(height: 60),
             pw.Text('(_________________________)'),
           ],
         ),
         pw.Column(
           children: [
-            pw.Text('Penerima', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+            pw.Text('Penerima',
+                style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
             pw.SizedBox(height: 60),
             pw.Text('(_________________________)'),
           ],
@@ -600,9 +622,12 @@ class AllPDF {
             pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
-                pw.Text('Hormat Kami,', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10)),
+                pw.Text('Hormat Kami,',
+                    style: pw.TextStyle(
+                        fontWeight: pw.FontWeight.bold, fontSize: 10)),
                 pw.SizedBox(height: 2),
-                pw.Text('CV Gubuk Pustaka Harmoni', style: pw.TextStyle(fontSize: 10)),
+                pw.Text('CV Gubuk Pustaka Harmoni',
+                    style: pw.TextStyle(fontSize: 10)),
                 pw.Container(
                   width: 150,
                   child: pw.Column(
@@ -610,16 +635,21 @@ class AllPDF {
                     crossAxisAlignment: pw.CrossAxisAlignment.center,
                     children: [
                       pw.Image(ttd, width: 120, height: 40),
-                      pw.Text(_directorName + ", " + _directorPosition, style: _textStyles.mediumBold),
+                      pw.Text(_directorName + ", " + _directorPosition,
+                          style: _textStyles.mediumBold),
                     ],
                   ),
                   height: 80,
                   decoration: pw.BoxDecoration(
-                    border: pw.Border(bottom: pw.BorderSide(width: 1, color: PdfColors.black)),
+                    border: pw.Border(
+                        bottom:
+                            pw.BorderSide(width: 1, color: PdfColors.black)),
                   ),
                 ),
                 pw.SizedBox(height: 4),
-                pw.Text('(tanda tangan)', style: pw.TextStyle(fontSize: 8, fontStyle: pw.FontStyle.italic)),
+                pw.Text('(tanda tangan)',
+                    style: pw.TextStyle(
+                        fontSize: 8, fontStyle: pw.FontStyle.italic)),
                 pw.SizedBox(height: 20),
               ],
             ),
@@ -627,16 +657,22 @@ class AllPDF {
             pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
-                pw.Text('Tanda Tangan Pembeli,', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10)),
+                pw.Text('Tanda Tangan Pembeli,',
+                    style: pw.TextStyle(
+                        fontWeight: pw.FontWeight.bold, fontSize: 10)),
                 pw.Container(
                   width: 150,
                   height: 80,
                   decoration: pw.BoxDecoration(
-                    border: pw.Border(bottom: pw.BorderSide(width: 1, color: PdfColors.black)),
+                    border: pw.Border(
+                        bottom:
+                            pw.BorderSide(width: 1, color: PdfColors.black)),
                   ),
                 ),
                 pw.SizedBox(height: 4),
-                pw.Text('(tanda tangan)', style: pw.TextStyle(fontSize: 8, fontStyle: pw.FontStyle.italic)),
+                pw.Text('(tanda tangan)',
+                    style: pw.TextStyle(
+                        fontSize: 8, fontStyle: pw.FontStyle.italic)),
                 pw.SizedBox(height: 20),
               ],
             ),
@@ -648,7 +684,8 @@ class AllPDF {
   }
 
   // Footer Sections
-  static pw.Widget _buildFooter(pw.MemoryImage ttd, List<String> notes, {bool showSignature = true}) {
+  static pw.Widget _buildFooter(pw.MemoryImage ttd, List<String> notes,
+      {bool showSignature = true}) {
     return pw.Row(
       crossAxisAlignment: pw.CrossAxisAlignment.end,
       children: [
@@ -733,12 +770,15 @@ class AllPDF {
     );
   }
 
-  static pw.Widget _buildKeyValueRowBold(String key, String value, {PdfColor? color}) {
+  static pw.Widget _buildKeyValueRowBold(String key, String value,
+      {PdfColor? color}) {
     return pw.Padding(
       padding: const pw.EdgeInsets.symmetric(vertical: 2),
       child: pw.Row(
         children: [
-          pw.Expanded(child: pw.Text(key, style: _textStyles.mediumBold.copyWith(color: color))),
+          pw.Expanded(
+              child: pw.Text(key,
+                  style: _textStyles.mediumBold.copyWith(color: color))),
           pw.Text(value, style: _textStyles.mediumBold.copyWith(color: color)),
         ],
       ),
@@ -753,7 +793,8 @@ class AllPDF {
           pw.Text(label, style: _textStyles.small),
           pw.Text(
             value,
-            style: _textStyles.medium.copyWith(color: _colors.green800, fontWeight: pw.FontWeight.bold),
+            style: _textStyles.medium.copyWith(
+                color: _colors.green800, fontWeight: pw.FontWeight.bold),
           ),
         ],
       ),
@@ -764,16 +805,22 @@ class AllPDF {
 // Text Styles Helper Class
 class _TextStyles {
   final pw.TextStyle small = pw.TextStyle(fontSize: 9);
-  final pw.TextStyle smallBold = pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold);
+  final pw.TextStyle smallBold =
+      pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold);
   final pw.TextStyle normal = pw.TextStyle(fontSize: 10);
-  final pw.TextStyle normalBold = pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold);
+  final pw.TextStyle normalBold =
+      pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold);
   final pw.TextStyle medium = pw.TextStyle(fontSize: 11);
-  final pw.TextStyle mediumBold = pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold);
+  final pw.TextStyle mediumBold =
+      pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold);
   final pw.TextStyle large = pw.TextStyle(fontSize: 13);
-  final pw.TextStyle largeBold = pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold);
+  final pw.TextStyle largeBold =
+      pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold);
   final pw.TextStyle xLarge = pw.TextStyle(fontSize: 15);
-  final pw.TextStyle xLargeBold = pw.TextStyle(fontSize: 15, fontWeight: pw.FontWeight.bold);
-  final pw.TextStyle title = pw.TextStyle(fontSize: 23, fontWeight: pw.FontWeight.bold);
+  final pw.TextStyle xLargeBold =
+      pw.TextStyle(fontSize: 15, fontWeight: pw.FontWeight.bold);
+  final pw.TextStyle title =
+      pw.TextStyle(fontSize: 23, fontWeight: pw.FontWeight.bold);
 }
 
 // Colors Helper Class
