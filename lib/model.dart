@@ -250,7 +250,7 @@ class Invoice with ChangeNotifier {
   // GETTERS ================================================================
 
   /// Subtotal before discount and tax
-  int get subTotal {
+  double get subTotal {
     return items.fold(0, (sum, item) => sum + item.totalPrice);
   }
 
@@ -282,7 +282,7 @@ class Invoice with ChangeNotifier {
     return totalAfterDiscount + totalTax;
   }
    bool get isPaid {
-    return downPayment == total;
+    return downPayment == total&&downPayment!=0;
   }
 
   /// Remaining payment after down payment

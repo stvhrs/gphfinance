@@ -148,7 +148,7 @@ class CreateInvoiceCustomer extends StatelessWidget {
                   CurrencyInputFormatter(),
                 ],
                 decoration: InputDecoration(
-                  labelText: 'Biaya komisi',
+                  labelText: 'Biaya Komisi',
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.money_off_csred_rounded),
                 ),

@@ -23,7 +23,7 @@ class ProviderStreamInovices with ChangeNotifier {
     return _invoices.fold(0, (sum, invoice) => sum + invoice.totalCostPrice);
   }
 
-  /// TOTAL komisi - VARIABLE BARU
+  /// Total Komisi - VARIABLE BARU
   double get totalkomisi {
     return _invoices.fold(0, (sum, invoice) => sum + invoice.biayakomisi);
   }
@@ -33,7 +33,7 @@ class ProviderStreamInovices with ChangeNotifier {
     return _invoices.fold(0, (sum, invoice) => sum + invoice.biayakomisi);
   }
 
-  /// Total semua biaya (HPP + cost sales + komisi)
+  /// Total semua biaya (HPP + cost sales + Komisi)
   double get totalAllCosts {
     return totalCost + totalCostSales + totalkomisi;
   }
@@ -95,18 +95,18 @@ class ProviderStreamInovices with ChangeNotifier {
     return _invoices.reduce((a, b) => a.total < b.total ? a : b);
   }
 
-  /// Invoice dengan biaya komisi tertinggi - METHOD BARU
+  /// Invoice dengan biaya Komisi tertinggi - METHOD BARU
   Invoice? get highestkomisiInvoice {
     if (_invoices.isEmpty) return null;
     return _invoices.reduce((a, b) => a.biayakomisi > b.biayakomisi ? a : b);
   }
 
-  /// Rata-rata biaya komisi per invoice - METHOD BARU
+  /// Rata-rata biaya Komisi per invoice - METHOD BARU
   double get averagekomisiPerInvoice {
     return _invoices.isNotEmpty ? totalkomisi / _invoices.length : 0;
   }
 
-  /// Persentase biaya komisi terhadap total sales - METHOD BARU
+  /// Persentase biaya Komisi terhadap total sales - METHOD BARU
   double get komisiToSalesRatio {
     return totalSales > 0 ? (totalkomisi / totalSales) * 100 : 0;
   }
@@ -182,7 +182,7 @@ class ProviderStreamInovices with ChangeNotifier {
     return _invoices.where((invoice) => invoice.school == school).toList();
   }
 
-  /// Filter invoices dengan biaya komisi di atas threshold - METHOD BARU
+  /// Filter invoices dengan biaya Komisi di atas threshold - METHOD BARU
   List<Invoice> filterBykomisiThreshold(double threshold) {
     return _invoices
         .where((invoice) => invoice.biayakomisi >= threshold)
@@ -195,7 +195,7 @@ class ProviderStreamInovices with ChangeNotifier {
     return filteredInvoices.fold(0, (sum, invoice) => sum + invoice.total);
   }
 
-  /// Get total komisi for a specific date range - METHOD BARU
+  /// Get Total Komisi for a specific date range - METHOD BARU
   double getkomisiByDateRange(DateTime startDate, DateTime endDate) {
     final filteredInvoices = filterByDateRange(startDate, endDate);
     return filteredInvoices.fold(
@@ -211,7 +211,7 @@ class ProviderStreamInovices with ChangeNotifier {
   //   return totalSales - totalCosts;
   // }
 
-  /// Get summary statistics termasuk komisi - METHOD BARU
+  /// Get summary statistics termasuk Komisi - METHOD BARU
   Map<String, dynamic> getSummary() {
     return {
       'totalInvoices': _invoices.length,
@@ -233,7 +233,7 @@ class ProviderStreamInovices with ChangeNotifier {
     };
   }
 
-  /// Get komisi analysis - METHOD BARU
+  /// Get Komisi analysis - METHOD BARU
   Map<String, dynamic> getkomisiAnalysis() {
     final highestkomisi = highestkomisiInvoice;
 
@@ -252,7 +252,7 @@ class ProviderStreamInovices with ChangeNotifier {
     };
   }
 
-  /// Export data komisi untuk reporting - METHOD BARU
+  /// Export data Komisi untuk reporting - METHOD BARU
   List<Map<String, dynamic>> exportkomisiData() {
     return _invoices
         .map((invoice) => {

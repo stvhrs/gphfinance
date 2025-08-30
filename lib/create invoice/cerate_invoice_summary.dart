@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gphfinance/model.dart';
 import 'package:provider/provider.dart';
+import 'package:gphfinance/helper/rupiah_format.dart'; // Import formatter
 
 class CerateInvoiceSummary extends StatelessWidget {
   const CerateInvoiceSummary({super.key});
@@ -25,20 +26,23 @@ class CerateInvoiceSummary extends StatelessWidget {
           SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [Text('Subtotal:'), Text('Rp${invoice.subTotal}')],
+            children: [
+              Text('Subtotal:'), 
+              Text(Rupiah.toStringFormated(invoice.subTotal.toDouble()))
+            ],
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('Diskon (${invoice.discount}%):'),
-              Text('-Rp${invoice.totalDiscount.toStringAsFixed(0)}'),
+              Text('-${Rupiah.toStringFormated(invoice.totalDiscount)}'),
             ],
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('PPN (${invoice.tax}%):'),
-              Text('+Rp${invoice.totalTax.toStringAsFixed(0)}'),
+              Text('+${Rupiah.toStringFormated(invoice.totalTax)}'),
             ],
           ),
           Divider(),
@@ -47,7 +51,7 @@ class CerateInvoiceSummary extends StatelessWidget {
             children: [
               Text('Total:', style: TextStyle(fontWeight: FontWeight.bold)),
               Text(
-                'Rp${invoice.total.toStringAsFixed(0)}',
+                Rupiah.toStringFormated(invoice.total.toDouble()),
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ],
@@ -56,7 +60,7 @@ class CerateInvoiceSummary extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('Down Payment:'),
-              Text('Rp${invoice.downPayment.toStringAsFixed(0)}'),
+              Text(Rupiah.toStringFormated(invoice.downPayment)),
             ],
           ),
           Row(
@@ -64,10 +68,9 @@ class CerateInvoiceSummary extends StatelessWidget {
             children: [
               Text('Kekurangan:'),
               Text(
-                'Rp${invoice.remainingPayment.toStringAsFixed(0)}',
+                Rupiah.toStringFormated(invoice.remainingPayment),
                 style: TextStyle(
-                  color:
-                      invoice.remainingPayment > 0 ? Colors.red : Colors.green,
+                  color: invoice.remainingPayment > 0 ? Colors.red : Colors.green,
                 ),
               ),
             ],
@@ -77,9 +80,9 @@ class CerateInvoiceSummary extends StatelessWidget {
             children: [
               Text('Status:'),
               Text(
-                invoice.paid ? 'LUNAS' : 'BELUM LUNAS',
+                invoice.isPaid ? 'LUNAS' : 'BELUM LUNAS',
                 style: TextStyle(
-                  color: invoice.paid ? Colors.green : Colors.orange,
+                  color: invoice.isPaid ? Colors.green : Colors.orange,
                 ),
               ),
             ],

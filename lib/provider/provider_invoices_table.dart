@@ -18,12 +18,12 @@ class InvoicesTableProvider with ChangeNotifier {
 
   /// Total cost sales dari semua invoice (biaya tambahan)
 
-  /// Total biaya komisi dari semua invoice
+  /// Total biaya Komisi dari semua invoice
   double get totalBiayakomisi {
     return _invoices.fold(0, (sum, invoice) => sum + invoice.biayakomisi);
   }
 
-  /// Total semua biaya (HPP + cost sales + biaya komisi)
+  /// Total semua biaya (HPP + cost sales + biaya Komisi)
   double get totalAllCosts {
     return totalCost + totalBiayakomisi;
   }

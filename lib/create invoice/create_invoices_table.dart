@@ -4,6 +4,7 @@ import 'package:gphfinance/invoice_detail.dart';
 import 'package:gphfinance/model.dart';
 import 'package:gphfinance/provider/provider_invoices_table.dart';
 import 'package:provider/provider.dart';
+import 'package:gphfinance/helper/rupiah_format.dart'; // Import formatter
 
 class CreateInvoicesTable extends StatelessWidget {
   @override
@@ -22,32 +23,35 @@ class CreateInvoicesTable extends StatelessWidget {
                   children: [
                     _buildSummaryCard(
                       'Total Sales',
-                      'Rp${InvoicesTableProvider.totalSales.toStringAsFixed(0)}',
+                      Rupiah.toStringFormated(InvoicesTableProvider.totalSales),
                       Colors.green,
                     ),
                     _buildSummaryCard(
                       'Total HPP',
-                      'Rp${InvoicesTableProvider.totalCost.toStringAsFixed(0)}',
+                      Rupiah.toStringFormated(InvoicesTableProvider.totalCost),
                       Colors.blue,
                     ),
                     _buildSummaryCard(
-                      'Total komisi',
-                      'Rp${InvoicesTableProvider.totalBiayakomisi.toStringAsFixed(0)}',
+                      'Total Komisi',
+                      Rupiah.toStringFormated(
+                          InvoicesTableProvider.totalBiayakomisi),
                       Colors.blue,
                     ),
                     _buildSummaryCard(
                       'Total Profit',
-                      'Rp${InvoicesTableProvider.totalNetProfit.toStringAsFixed(0)}',
+                      Rupiah.toStringFormated(
+                          InvoicesTableProvider.totalNetProfit),
                       Colors.purple,
                     ),
                     _buildSummaryCard(
                       'Paid',
-                      'Rp${InvoicesTableProvider.totalPaid.toStringAsFixed(0)}',
+                      Rupiah.toStringFormated(InvoicesTableProvider.totalPaid),
                       Colors.teal,
                     ),
                     _buildSummaryCard(
                       'Unpaid',
-                      'Rp${InvoicesTableProvider.totalUnpaid.toStringAsFixed(0)}',
+                      Rupiah.toStringFormated(
+                          InvoicesTableProvider.totalUnpaid),
                       Colors.orange,
                     ),
                     _buildSummaryCard(
@@ -91,43 +95,33 @@ class CreateInvoicesTable extends StatelessWidget {
                   child: DataTable(
                     columnSpacing: 20,
                     columns: [
-                      DataColumn(label: Text('ID')),
-                      DataColumn(label: Text('Date')),
-                      DataColumn(label: Text('School'), numeric: true),
+                      DataColumn(label: Text('School')),
                       DataColumn(label: Text('Items'), numeric: true),
                       DataColumn(label: Text('Subtotal'), numeric: true),
                       DataColumn(label: Text('Discount'), numeric: true),
                       DataColumn(label: Text('Tax'), numeric: true),
                       DataColumn(label: Text('Total'), numeric: true),
                       DataColumn(label: Text('Paid'), numeric: true),
-                      DataColumn(label: Text('Status'), numeric: true),
-                      DataColumn(label: Text('Actions'), numeric: true),
+                      DataColumn(label: Text('Status')),
+                      DataColumn(label: Text('Actions')),
                     ],
                     rows: InvoicesTableProvider.invoices.map((invoice) {
                       return DataRow(
                         cells: [
                           DataCell(
-                            Tooltip(
-                              message: invoice.id,
-                              child: Text(invoice.id.substring(0, 8)),
-                            ),
-                          ),
-                          DataCell(Text(invoice.displayDate)),
-                          DataCell(
                             Text(
-                              invoice.recipient.isNotEmpty
-                                  ? invoice.school
-                                  : '-',
+                              invoice.school.isNotEmpty ? invoice.school : '-',
                             ),
                           ),
                           DataCell(Text(
                               '${invoice.items.fold(0, (sum, item) => sum + item.quantity)}')),
-                          DataCell(Text('Rp${invoice.subTotal}')),
+                          DataCell(Text(Rupiah.toStringFormated(
+                              invoice.subTotal.toDouble()))),
                           DataCell(Text('${invoice.discount}%')),
                           DataCell(Text('${invoice.tax}%')),
                           DataCell(
                             Text(
-                              'Rp${invoice.total.toStringAsFixed(0)}',
+                              Rupiah.toStringFormated(invoice.total.toDouble()),
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: Colors.blue,
@@ -136,7 +130,7 @@ class CreateInvoicesTable extends StatelessWidget {
                           ),
                           DataCell(
                             Text(
-                              'Rp${invoice.downPayment.toStringAsFixed(0)}',
+                              Rupiah.toStringFormated(invoice.downPayment),
                               style: TextStyle(
                                 color: invoice.downPayment > 0
                                     ? Colors.green
@@ -147,14 +141,14 @@ class CreateInvoicesTable extends StatelessWidget {
                           DataCell(
                             Chip(
                               label: Text(
-                                invoice.paid ? 'PAID' : 'UNPAID',
+                                invoice.isPaid ? 'PAID' : 'UNPAID',
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 12,
                                 ),
                               ),
                               backgroundColor:
-                                  invoice.paid ? Colors.green : Colors.orange,
+                                  invoice.isPaid ? Colors.green : Colors.orange,
                               padding: EdgeInsets.symmetric(
                                 horizontal: 8,
                                 vertical: 2,
@@ -209,7 +203,7 @@ class CreateInvoicesTable extends StatelessWidget {
   Widget _buildSummaryCard(String title, String value, Color color) {
     return Card(
       elevation: 2,
-      color: color.withOpacity(0.1),
+      color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(
@@ -235,50 +229,6 @@ class CreateInvoicesTable extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-
-  void _viewInvoiceDetails(BuildContext context, Invoice invoice) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Invoice Details'),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('ID: ${invoice.id}'),
-                Text('Date: ${invoice.displayDate}'),
-                Text('Recipient: ${invoice.recipient}'),
-                Text('School: ${invoice.school}'),
-                Text('Address: ${invoice.address}'),
-                Divider(),
-                Text('Items: ${invoice.items.length}'),
-                Text('Subtotal: Rp${invoice.subTotal}'),
-                Text(
-                  'Discount: ${invoice.discount}% (Rp${invoice.totalDiscount.toStringAsFixed(0)})',
-                ),
-                Text(
-                  'Tax: ${invoice.tax}% (Rp${invoice.totalTax.toStringAsFixed(0)})',
-                ),
-                Text('Total: Rp${invoice.total.toStringAsFixed(0)}'),
-                Text('Paid: Rp${invoice.downPayment.toStringAsFixed(0)}'),
-                Text(
-                  'Remaining: Rp${invoice.remainingPayment.toStringAsFixed(0)}',
-                ),
-                Text('Status: ${invoice.paid ? 'PAID' : 'UNPAID'}'),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Close'),
-            ),
-          ],
-        );
-      },
     );
   }
 

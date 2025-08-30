@@ -38,64 +38,59 @@ class _InvoicesTableStreamState extends State<InvoicesTableStream> {
                     // Total Sales
                     _buildSummaryCard(
                       'Total Sales',
-                      Rupiah.toStringFormated(ProviderStreamInovices
-                          .totalSales), // Memformat total sales menjadi Rupiah
+                      Rupiah.toStringFormated(
+                          ProviderStreamInovices.totalSales),
                       Colors.green,
                     ),
                     // Total HPP
                     _buildSummaryCard(
                       'Total HPP',
-                      Rupiah.toStringFormated(ProviderStreamInovices
-                          .totalCost), // Memformat total cost menjadi Rupiah
+                      Rupiah.toStringFormated(ProviderStreamInovices.totalCost),
                       Colors.blue,
                     ),
-                    // Total komisi
+                    // Total Komisi
                     _buildSummaryCard(
-                      'Total komisi',
-                      Rupiah.toStringFormated(ProviderStreamInovices
-                          .totalkomisi), // Memformat total komisi menjadi Rupiah
+                      'Total Komisi',
+                      Rupiah.toStringFormated(
+                          ProviderStreamInovices.totalkomisi),
                       Colors.blue,
                     ),
                     // Total Profit
                     _buildSummaryCard(
                       'Total Profit',
-                      Rupiah.toStringFormated(ProviderStreamInovices
-                          .totalNetProfit), // Memformat total profit menjadi Rupiah
+                      Rupiah.toStringFormated(
+                          ProviderStreamInovices.totalNetProfit),
                       Colors.purple,
                     ),
                     // Total Paid
                     _buildSummaryCard(
                       'Paid',
-                      Rupiah.toStringFormated(ProviderStreamInovices
-                          .totalPaid), // Memformat total paid menjadi Rupiah
+                      Rupiah.toStringFormated(ProviderStreamInovices.totalPaid),
                       Colors.teal,
                     ),
                     // Total Unpaid
                     _buildSummaryCard(
                       'Unpaid',
-                      Rupiah.toStringFormated(ProviderStreamInovices
-                          .totalUnpaid), // Memformat total unpaid menjadi Rupiah
+                      Rupiah.toStringFormated(
+                          ProviderStreamInovices.totalUnpaid),
                       Colors.orange,
                     ),
                     // Total Invoices
                     _buildSummaryCard(
                       'Invoices',
-                      ProviderStreamInovices.invoices.length
-                          .toString(), // Menampilkan jumlah invoice (bukan angka dengan format)
+                      ProviderStreamInovices.invoices.length.toString(),
                       Colors.indigo,
                     ),
                     // Paid Invoices
                     _buildSummaryCard(
                       'Paid Invoices',
-                      ProviderStreamInovices.paidInvoicesCount
-                          .toString(), // Menampilkan jumlah invoice lunas
+                      ProviderStreamInovices.paidInvoicesCount.toString(),
                       Colors.green,
                     ),
                     // Unpaid Invoices
                     _buildSummaryCard(
                       'Unpaid Invoices',
-                      ProviderStreamInovices.unpaidInvoicesCount
-                          .toString(), // Menampilkan jumlah invoice belum lunas
+                      ProviderStreamInovices.unpaidInvoicesCount.toString(),
                       Colors.red,
                     ),
                   ],
@@ -106,7 +101,7 @@ class _InvoicesTableStreamState extends State<InvoicesTableStream> {
           Divider(),
           Expanded(
             child: StreamBuilder(
-              stream: _dbRef.orderByKey() .onValue,
+              stream: _dbRef.orderByKey().onValue,
               builder: (context, AsyncSnapshot<DatabaseEvent> snapshot) {
                 if (snapshot.hasError) {
                   return Center(child: Text("Error: ${snapshot.error}"));
@@ -170,7 +165,6 @@ class _InvoicesTableStreamState extends State<InvoicesTableStream> {
                                 TableBorder.all(color: Colors.grey.shade300),
                             columns: const [
                               DataColumn(label: Text("No")),
-                              DataColumn(label: Text("Date")),
                               DataColumn(label: Text("Recipient")),
                               DataColumn(label: Text("School")),
                               DataColumn(label: Text("Books"), numeric: true),
@@ -182,11 +176,10 @@ class _InvoicesTableStreamState extends State<InvoicesTableStream> {
                               DataColumn(label: Text("Total"), numeric: true),
                               DataColumn(label: Text("HPP"), numeric: true),
                               DataColumn(
-                                  label: Text("Biaya komisi"), numeric: true),
+                                  label: Text("Biaya Komisi"), numeric: true),
                               DataColumn(label: Text("Profit"), numeric: true),
                               DataColumn(
                                   label: Text("DownPayment"), numeric: true),
-                              DataColumn(label: Text("Status")),
                               DataColumn(label: Text("Actions")),
                             ],
                             rows: [
@@ -200,7 +193,6 @@ class _InvoicesTableStreamState extends State<InvoicesTableStream> {
 
                                 return DataRow(cells: [
                                   DataCell(Text(globalIndex.toString())),
-                                  DataCell(Text(invoice.displayDate)),
                                   DataCell(
                                     ConstrainedBox(
                                       constraints:
@@ -222,46 +214,34 @@ class _InvoicesTableStreamState extends State<InvoicesTableStream> {
                                     ),
                                   ),
                                   DataCell(Text(invoice.totalBooks.toString())),
-                                  DataCell(Text("Rp${invoice.subTotal}")),
+                                  DataCell(Text(Rupiah.toStringFormated(
+                                      invoice.subTotal.toDouble()))),
                                   DataCell(Text("${invoice.discount}%")),
                                   DataCell(Text("${invoice.tax}%")),
                                   DataCell(
                                     Text(
-                                      "Rp${invoice.total.toStringAsFixed(0)}",
+                                      Rupiah.toStringFormated(
+                                          invoice.total.toDouble()),
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         color: Colors.blue,
                                       ),
                                     ),
                                   ),
-                                  DataCell(Text("Rp${invoice.totalCostPrice}")),
-                                  DataCell(Text("Rp${invoice.biayakomisi}")),
-                                  DataCell(Text("Rp${invoice.netProfit}")),
+                                  DataCell(Text(Rupiah.toStringFormated(
+                                      invoice.totalCostPrice))),
+                                  DataCell(Text(Rupiah.toStringFormated(
+                                      invoice.biayakomisi))),
+                                  DataCell(Text(Rupiah.toStringFormated(
+                                      invoice.netProfit))),
                                   DataCell(
                                     Text(
-                                      "Rp${invoice.downPayment.toStringAsFixed(0)}",
+                                      Rupiah.toStringFormated(
+                                          invoice.downPayment),
                                       style: TextStyle(
                                         color: invoice.downPayment > 0
                                             ? Colors.green
                                             : Colors.grey,
-                                      ),
-                                    ),
-                                  ),
-                                  DataCell(
-                                    Chip(
-                                      label: Text(
-                                        invoice.paid ? "PAID" : "UNPAID",
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                      backgroundColor: invoice.paid
-                                          ? Colors.green
-                                          : Colors.orange,
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 2,
                                       ),
                                     ),
                                   ),
@@ -414,27 +394,6 @@ class _InvoicesTableStreamState extends State<InvoicesTableStream> {
         ),
       )),
     ));
-    // showDialog(
-    //   context: context,
-    //   builder: (BuildContext context) {
-    //     context.read<Invoice>().updateFromInvoice(invoice);
-    //     return Dialog(
-    //       backgroundColor: Colors.white,
-    //       shape: RoundedRectangleBorder(
-    //         borderRadius: BorderRadius.circular(16),
-    //       ),
-    //       elevation: 10,
-    //       child: Padding(
-    //         padding: const EdgeInsets.all(24.0),
-    //         child: SizedBox(
-    //             width: 1000,
-    //             child: InoviceForm(
-    //               update: true,
-    //             )),
-    //       ), // Your CreateInvoices widget inside the dialog
-    //     );
-    //   },
-    // );
   }
 }
 
