@@ -46,7 +46,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => ProviderStreamInovices()),
         ChangeNotifierProvider(create: (context) => Invoice()),
       ],
-      child: MaterialApp(
+      child: MaterialApp(debugShowCheckedModeBanner: false,
         title: 'Invoice Management System',
         theme: AppTheme.theme,
         home: Home(
