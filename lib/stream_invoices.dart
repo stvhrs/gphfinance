@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/services.dart';
 import 'package:gphfinance/create%20invoice/create_invoices.dart';
 import 'package:gphfinance/create%20invoice/pdf/preview_pdf.dart';
 import 'package:gphfinance/helper/rupiah_format.dart';
 import 'package:gphfinance/invoice_detail.dart';
+import 'package:gphfinance/main.dart';
 import 'package:gphfinance/model.dart';
 import 'package:gphfinance/provider/provider_invoices_table.dart';
 import 'package:gphfinance/provider/provider_stream_inovices.dart';
@@ -27,7 +29,7 @@ class _InvoicesTableStreamState extends State<InvoicesTableStream> {
     return Scaffold(
       body: Column(
         children: [
-          Consumer<ProviderStreamInovices>(
+      isMobile?SizedBox():    Consumer<ProviderStreamInovices>(
             builder: (context, ProviderStreamInovices, child) {
               return Padding(
                 padding: const EdgeInsets.all(8.0),

@@ -3,11 +3,13 @@ import 'dart:developer';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gphfinance/create%20invoice/button_pushfirebase_invoices.dart';
 import 'package:gphfinance/create%20invoice/cerate_invoice_summary.dart';
 import 'package:gphfinance/create%20invoice/create_invoice_customer.dart';
 import 'package:gphfinance/create%20invoice/create_invoice_items.dart';
 import 'package:gphfinance/helper/input_currency.dart';
 import 'package:gphfinance/helper/rupiah_format.dart';
+import 'package:gphfinance/main.dart';
 import 'package:gphfinance/provider/provider_stream_inovices.dart';
 import 'package:provider/provider.dart';
 import 'package:gphfinance/create%20invoice/create_invoices_table.dart';
@@ -67,7 +69,7 @@ class InoviceForm extends StatelessWidget {
                     ),
                     child: Text('Edit Invoice'),
                   )
-                : ElevatedButton(
+                :isMobile?SizedBox(): ElevatedButton(
                     onPressed: () async {
                       final invoiceProvider = context.read<InvoicesTableProvider>();
                       final invoiceCopy = invoice.copy();
@@ -78,7 +80,7 @@ class InoviceForm extends StatelessWidget {
                       backgroundColor: Colors.green,
                     ),
                     child: Text('Simpan Invoice'),
-                  ),
+                  ),!update&&isMobile?PushInvoicesButton():SizedBox()
           ],
         ),
       ],
@@ -94,16 +96,16 @@ class CreateInvoices extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Row(
           children: [
-            Expanded(
+           Expanded(
               flex: 3,
               child: InoviceForm(
                 update: false,
               ),
             ),
-            VerticalDivider(
+           isMobile?SizedBox():   VerticalDivider(
               width: 8,
             ),
-            Expanded(flex: 3, child: CreateInvoicesTable()),
+          isMobile?SizedBox():    Expanded(flex: 3, child: CreateInvoicesTable()),
           ],
         ),
       ),

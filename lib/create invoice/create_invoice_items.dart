@@ -46,38 +46,39 @@ class CreateInvoiceItems extends StatelessWidget {
                 await FirebaseDatabase.instance.ref().child("books").get();
 
             // Memeriksa apakah snapshot memiliki data
-           
-              // Mengonversi data ke Map
-              Map<dynamic, dynamic> booksMap =
-                  Map<dynamic, dynamic>.from(snapshot.value as Map);
 
-              // Mengonversi Map menjadi List<Book>
-              List<Book> books = booksMap.entries.map((entry) {
-                // Mengambil key sebagai ID buku
-                String bookId = entry.key as String;
+            // Mengonversi data ke Map
+            Map<dynamic, dynamic> booksMap =
+                Map<dynamic, dynamic>.from(snapshot.value as Map);
 
-                // Mengonversi value menjadi Map<String, dynamic>
-                Map<String, dynamic> bookData =
-                    Map<String, dynamic>.from(entry.value as Map);
+            // Mengonversi Map menjadi List<Book>
+            List<Book> books = booksMap.entries.map((entry) {
+              // Mengambil key sebagai ID buku
+              String bookId = entry.key as String;
 
-                // Menambahkan ID ke data buku
-                bookData['id'] = bookId;
+              // Mengonversi value menjadi Map<String, dynamic>
+              Map<String, dynamic> bookData =
+                  Map<String, dynamic>.from(entry.value as Map);
 
-                // Membuat objek Book dari data
-                return Book.fromJson(bookData);
-              }).toList();
+              // Menambahkan ID ke data buku
+              bookData['id'] = bookId;
 
-              // Filter buku berdasarkan pola pencarian
-              return books
-                  .where((book) =>
-                      book.name.toLowerCase().contains(pattern.toLowerCase()))
-                  .toList();
+              // Membuat objek Book dari data
+              return Book.fromJson(bookData);
+            }).toList();
+
+            // Filter buku berdasarkan pola pencarian
+            return books
+                .where((book) =>
+                    book.name.toLowerCase().contains(pattern.toLowerCase()))
+                .toList();
           },
           itemBuilder: (context, Book suggestion) {
             return ListTile(
               leading: Icon(Icons.menu_book_rounded, color: suggestion.color),
               title: Text(suggestion.name),
-              subtitle: Text('\$${suggestion.sellingPrice}'),
+              subtitle: Text(
+                  Rupiah.toStringFormated(suggestion.sellingPrice.toDouble())),
             );
           },
           onSuggestionSelected: (suggestion) {

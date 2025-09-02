@@ -14,8 +14,6 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 
 void main() async {
-    
-
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(
@@ -35,9 +33,12 @@ void main() async {
   runApp(MyApp());
 }
 
+bool isMobile = false;
+
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    isMobile = MediaQuery.of(context).size.width < 600;
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => InvoicesTableProvider()),
@@ -48,7 +49,9 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Invoice Management System',
         theme: AppTheme.theme,
-        home: Home(title: "",),
+        home: Home(
+          title: "",
+        ),
       ),
     );
   }
