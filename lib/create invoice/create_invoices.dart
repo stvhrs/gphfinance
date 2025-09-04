@@ -47,19 +47,18 @@ class InoviceForm extends StatelessWidget {
                 ? ElevatedButton(
                     onPressed: () async {
                       try {
-                       
                         // Reference to the invoice in the Firebase Realtime Database
                         final invoiceRef =
-                             FirebaseDatabase.instance.ref().child('invoices');
-                  final Map<String, Object?> updatedDataTyped = Map<String, Object?>.from(invoice.toJson() );
+                            FirebaseDatabase.instance.ref().child('invoices');
+                        final Map<String, Object?> updatedDataTyped =
+                            Map<String, Object?>.from(invoice.toJson());
                         // Update the data
                         await invoiceRef
                             .child(invoice.id)
                             .update(updatedDataTyped);
-   Navigator.of(context).pop();
+                        Navigator.of(context).pop();
 
                         print("Invoice updated successfully.");
-                       
                       } catch (e) {
                         print("Error updating invoice: $e");
                       }
@@ -69,18 +68,20 @@ class InoviceForm extends StatelessWidget {
                     ),
                     child: Text('Edit Invoice'),
                   )
-                :isMobile?SizedBox(): ElevatedButton(
-                    onPressed: () async {
-                      final invoiceProvider = context.read<InvoicesTableProvider>();
-                      final invoiceCopy = invoice.copy();
-                      invoiceProvider.addInvoice(invoiceCopy);
-                      invoice.resetCustomerInfo();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                    ),
-                    child: Text('Simpan Invoice'),
-                  ),!update&&isMobile?PushInvoicesButton():SizedBox()
+                : ElevatedButton(
+                        onPressed: () async {
+                          final invoiceProvider =
+                              context.read<InvoicesTableProvider>();
+                          final invoiceCopy = invoice.copy();
+                          invoiceProvider.addInvoice(invoiceCopy);
+                          invoice.resetCustomerInfo();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                        ),
+                        child: Text('Simpan Invoice'),
+                      ),
+            !update && isMobile ? PushInvoicesButton() : SizedBox()
           ],
         ),
       ],
@@ -96,16 +97,20 @@ class CreateInvoices extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Row(
           children: [
-           Expanded(
+            Expanded(
               flex: 3,
               child: InoviceForm(
                 update: false,
               ),
             ),
-           isMobile?SizedBox():   VerticalDivider(
-              width: 8,
-            ),
-          isMobile?SizedBox():    Expanded(flex: 3, child: CreateInvoicesTable()),
+            isMobile
+                ? SizedBox()
+                : VerticalDivider(
+                    width: 8,
+                  ),
+            isMobile
+                ? SizedBox()
+                : Expanded(flex: 3, child: CreateInvoicesTable()),
           ],
         ),
       ),

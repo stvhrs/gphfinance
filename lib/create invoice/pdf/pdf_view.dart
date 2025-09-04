@@ -20,6 +20,9 @@ class PdfView extends StatefulWidget {
 }
 
 class _PdfViewState extends State<PdfView> {
+   Uint8List? _cachedPdf;
+  bool _shared = false; // supaya share hanya sekali
+
   void _showPrintedToast(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Document printed successfully')),
@@ -27,36 +30,49 @@ class _PdfViewState extends State<PdfView> {
   }
 
   Future<Uint8List> _generatePdf() async {
+    if (_cachedPdf != null) return _cachedPdf!; // pakai cache
+
     Uint8List data;
     switch (widget.documentType) {
       case "Create Delivery Note":
-        data = await DeliveryNotePdfGenerator.generateDeliveryNotePdf(
-            widget.invoice);
-        _sharePdf(data, widget.invoice.id.replaceAll("INV", "SJ"));
-        return data;
+        data = await DeliveryNotePdfGenerator.generateDeliveryNotePdf(widget.invoice);
+         _sharePdf(data, widget.invoice.id.replaceAll("INV", "SJ"));
+        break;
 
       case "Create Payment Receipt":
-        data = await PaymentReceiptPdfGenerator.generatePaymentReceiptPdf(
-            widget.invoice);
-        _sharePdf(data, widget.invoice.id.replaceAll("INV", "NT"));
-        return data;
+        data = await PaymentReceiptPdfGenerator.generatePaymentReceiptPdf(widget.invoice);
+         _sharePdf(data, widget.invoice.id.replaceAll("INV", "NT"));
+        break;
 
       case "Create PO":
-        data = await PurchaseOrderPdfGenerator.generatePurchaseOrderPdf(
-            widget.invoice);
-        _sharePdf(data, widget.invoice.id.replaceAll("INV", "PO"));
-        return data;
+        data = await PurchaseOrderPdfGenerator.generatePurchaseOrderPdf(widget.invoice);
+         _sharePdf(data, widget.invoice.id.replaceAll("INV", "PO"));
+        break;
 
       case "Create Invoice":
         data = await InvoicePdfService.generate(widget.invoice);
-        _sharePdf(data, widget.invoice.id);
-        return data;
+         _sharePdf(data, widget.invoice.id);
+        break;
 
       default:
-        data = await AllPDF.generateDocument(invoice: widget.invoice,type: DocumentType.allDocuments);
-        _sharePdf(data, widget.invoice.id);
-        return data;
+        data = await AllPDF.generateDocument(
+          invoice: widget.invoice,
+          type: DocumentType.allDocuments,
+        );
+         _sharePdf(data, widget.invoice.id);
+        break;
     }
+
+    // simpan cache
+    _cachedPdf = data;
+
+    // jalankan share hanya sekali
+    if (!_shared) {
+      _shared = true;
+      // contoh: _sharePdf(data, widget.invoice.id);
+    }
+
+    return data;
   }
 
   void _sharePdf(Uint8List data, String filename) async {
